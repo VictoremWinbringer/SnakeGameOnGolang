@@ -29,7 +29,7 @@ func main() {
 
 	w, h := s.Size()
 
-	p := point.New(3, 3, '*', s)
+	p := point.New(3, 3, '*', point.NewTerminalWriter(s))
 
 	p.Draw()
 
