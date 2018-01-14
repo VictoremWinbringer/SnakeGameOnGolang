@@ -1,6 +1,6 @@
 package point
 
-import "../matrix"
+import tc "github.com/gdamore/tcell"
 
 type Direction int
 
@@ -13,10 +13,10 @@ type Point struct {
 	x      int
 	y      int
 	value  rune
-	matrix *matrix.Matrix
+	matrix tc.Screen
 }
 
-func New(x int, y int, value rune, matrix *matrix.Matrix) Point {
+func New(x int, y int, value rune, matrix tc.Screen) Point {
 	return Point{x, y, value, matrix}
 }
 
@@ -33,6 +33,10 @@ func (point *Point) Move(direction Direction) {
 	}
 }
 
-func (p Point) Draw() error {
-	return p.matrix.Set(p.y, p.x, p.value)
+func (p Point) Draw() {
+	p.matrix.SetContent(p.x, p.y, p.value, nil, tc.StyleDefault)
+}
+
+func (this Point) Overlaps(other Point) bool {
+	return this.x == other.x && this.y == other.y
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"./matrix"
 	"./point"
 	tc "github.com/gdamore/tcell"
 )
@@ -30,9 +29,7 @@ func main() {
 
 	w, h := s.Size()
 
-	m := matrix.New(h, w)
-
-	p := point.New(3, 3, '*', &m)
+	p := point.New(3, 3, '*', s)
 
 	p.Draw()
 
@@ -46,8 +43,7 @@ func main() {
 	s.Show()
 	time.Sleep(time.Second)
 
-	m.Draw(s)
-	m.Clear()
+	p.Draw()
 	s.Show()
 
 	time.Sleep(time.Second)
