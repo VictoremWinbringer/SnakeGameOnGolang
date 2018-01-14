@@ -40,12 +40,16 @@ func main() {
 	for i, v := range st {
 		s.SetContent(i, 2, v, nil, tc.StyleDefault)
 	}
+
 	s.Show()
+
 	time.Sleep(time.Second)
 
 	p.Draw()
+
 	s.Show()
 
 	time.Sleep(time.Second)
+
 	s.ShowCursor(1, 1)
 }
