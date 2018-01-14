@@ -4,10 +4,10 @@ import tc "github.com/gdamore/tcell"
 
 type Direction int
 
-var Left Direction = 1
-var Right Direction = 2
-var Up Direction = 3
-var Down Direction = 4
+var Left Direction = 2
+var Right Direction = 1
+var Up Direction = 4
+var Down Direction = 3
 
 type Point struct {
 	x      int

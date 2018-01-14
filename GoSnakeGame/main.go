@@ -51,5 +51,19 @@ func main() {
 
 	time.Sleep(time.Second)
 
+	for i := 0; i < 10; i++ {
+
+		s.Clear()
+		if i%2 == 0 {
+			p.Move(point.Down)
+		} else {
+			p.Move(point.Left)
+		}
+
+		p.Draw()
+		s.Show()
+		time.Sleep(time.Second)
+	}
+
 	s.ShowCursor(1, 1)
 }
