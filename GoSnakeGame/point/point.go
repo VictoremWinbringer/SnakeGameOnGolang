@@ -55,3 +55,6 @@ func (p Point) Draw() {
 func (this Point) Overlaps(other Point) bool {
 	return this.x == other.x && this.y == other.y
 }
+func (this Point) Position() (x int, y int) {
+	return this.x, this.y
+}
