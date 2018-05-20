@@ -18,9 +18,18 @@ func New(points []point.Point) Figure {
 	return Figure{points}
 }
 
-func (this Figure) IsHit(p point.Point) bool {
-	for _, v := range this.points {
-		if p.Overlaps(v) {
+func (this Figure) IsHitPoint(point point.Point) bool {
+	for _, p := range this.points {
+		if p.Overlaps(point) {
+			return true
+		}
+	}
+	return false
+}
+
+func (this Figure) IsHitFigure(f Figure) bool {
+	for _, p := range this.points {
+		if f.IsHitPoint(p) {
 			return true
 		}
 	}

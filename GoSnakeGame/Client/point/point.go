@@ -17,13 +17,6 @@ func (t terminalWriter) Write(x, y int, value rune) {
 	t.screen.SetContent(x, y, value, nil, tc.StyleDefault)
 }
 
-type Direction int
-
-const Left Direction = 2
-const Right Direction = 1
-const Up Direction = 4
-const Down Direction = 3
-
 type Point struct {
 	x      int
 	y      int
@@ -35,21 +28,13 @@ func New(x int, y int, value rune, writer PointWriter) Point {
 	return Point{x, y, value, writer}
 }
 
-func (point *Point) Move(direction Direction) {
-	switch direction {
-	case Right:
-		point.x--
-	case Left:
-		point.x++
-	case Down:
-		point.y++
-	case Up:
-		point.y--
-	}
+func (point *Point) Move(x int, y int) {
+	point.x = x
+	point.y = y
 }
 
-func (p Point) Draw() {
-	p.writer.Write(p.x, p.y, p.value)
+func (this Point) Draw() {
+	this.writer.Write(this.x, this.y, this.value)
 }
 
 func (this Point) Overlaps(other Point) bool {

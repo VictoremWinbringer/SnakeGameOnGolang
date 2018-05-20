@@ -18,3 +18,13 @@ func New(x, y int, value rune, writer point.PointWriter) Snake {
 
 	return Snake{figure.New(points)}
 }
+
+type Direction uint8
+
+const Right Direction = 1
+const Left Direction = 2
+const Up Direction = 3
+const Down Direction = 4
+
+func (s *Snake) Go(direction Direction) {
+}
