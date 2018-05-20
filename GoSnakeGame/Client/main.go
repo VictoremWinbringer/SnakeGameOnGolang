@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 
 	// "fmt"
 	// "time"
@@ -13,6 +12,7 @@ import (
 	// s "./snake"
 	u "./udpClient"
 	// tc "github.com/gdamore/tcell"
+	ser "../Shared/serializer"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	defer func() {
 		upd.Close()
 	}()
-	_, err = upd.Write([]byte("Hello Sever!"))
+	_, err = upd.Write(ser.EncodeGameState(ser.GameState{"Hello Sever!"}))
 	if err != nil {
 		fmt.Printf("Error on write %v", err)
 		return
@@ -35,7 +35,7 @@ func main() {
 		fmt.Printf("Error on read %v", err)
 		return
 	}
-	fmt.Println(strings.Trim(string(buffer), " "))
+	fmt.Println(ser.DecodeGameState(buffer))
 	fmt.Println("Press enter to start game.")
 	fmt.Scanln()
 	// screen, e := tc.NewScreen()
