@@ -66,17 +66,13 @@ func main() {
 					screen.ShowCursor(0, 0)
 					channel <- new(interface{})
 				case tc.KeyUp:
-					x, y := food.Position()
-					food.Move(x, y-1)
+					snake.Go(s.Up)
 				case tc.KeyDown:
-					x, y := food.Position()
-					food.Move(x, y+1)
+					snake.Go(s.Down)
 				case tc.KeyLeft:
-					x, y := food.Position()
-					food.Move(x-1, y)
+					snake.Go(s.Left)
 				case tc.KeyRight:
-					x, y := food.Position()
-					food.Move(x+1, y)
+					snake.Go(s.Right)
 				}
 			}
 		}
@@ -90,6 +86,7 @@ func main() {
 			screen.Clear()
 			frame.Draw()
 			food.Draw()
+			snake.Move()
 			snake.Draw()
 			screen.Show()
 			time.Sleep(time.Millisecond * 100)
