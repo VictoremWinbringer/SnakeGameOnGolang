@@ -5,21 +5,21 @@ import (
 )
 
 type Figure struct {
-	points []point.Point
+	Points []point.Point
 }
 
 func (this Figure) Draw() {
-	for i := range this.points {
-		this.points[i].Draw()
+	for i := range this.Points {
+		this.Points[i].Draw()
 	}
 }
 
 func New(points []point.Point) Figure {
-	return Figure{points}
+	return Figure{Points}
 }
 
 func (this Figure) IsHitPoint(point point.Point) bool {
-	for _, p := range this.points {
+	for _, p := range this.Points {
 		if p.Overlaps(point) {
 			return true
 		}
@@ -28,7 +28,7 @@ func (this Figure) IsHitPoint(point point.Point) bool {
 }
 
 func (this Figure) IsHitFigure(f Figure) bool {
-	for _, p := range this.points {
+	for _, p := range this.Points {
 		if f.IsHitPoint(p) {
 			return true
 		}

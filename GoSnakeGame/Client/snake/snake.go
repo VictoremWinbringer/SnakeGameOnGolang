@@ -2,10 +2,11 @@ package snake
 
 import (
 	"../point"
+	"../figure"
 )
 
 type Snake struct {
-	points    []point.Point
+	figure.Figure
 	direction Direction
 }
 
@@ -16,7 +17,7 @@ func New(x, y int, value rune, writer point.PointWriter) Snake {
 	points = append(points, point.New(x-1, y, value, writer))
 	points = append(points, point.New(x-2, y, value, writer))
 
-	return Snake{points, Right}
+	return Snake{figure.New(points), Right}
 }
 
 type Direction uint8
@@ -26,12 +27,6 @@ const Left Direction = 2
 const Up Direction = 3
 const Down Direction = 4
 
-func (this Snake) Draw() {
-	for i := range this.points {
-		this.points[i].Draw()
-	}
-}
-
 func (s *Snake) Go(direction Direction) {
 	s.direction = direction
 }
@@ -39,7 +34,7 @@ func (s *Snake) Go(direction Direction) {
 func (s *Snake) Move() {
 	var oldX int
 	var oldY int
-	for i, p := range s.points {
+	for i, p := range s.Points {
 		if i == 0 {
 			x, y := p.Position()
 			oldX = x
@@ -61,6 +56,6 @@ func (s *Snake) Move() {
 			oldX = tempX
 			oldY = tempY
 		}
-		s.points[i] = p
+		s.Points[i] = p
 	}
 }
