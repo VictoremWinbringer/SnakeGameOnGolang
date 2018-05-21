@@ -15,7 +15,7 @@ func (this Figure) Draw() {
 }
 
 func New(points []point.Point) Figure {
-	return Figure{Points}
+	return Figure{points}
 }
 
 func (this Figure) IsHitPoint(point point.Point) bool {
