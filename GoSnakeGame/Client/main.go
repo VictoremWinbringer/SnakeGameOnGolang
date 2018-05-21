@@ -1,16 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	_ "../Shared/serializer"
-	fd "./food"
-	f "./frame"
-	p "./point"
-	s "./snake"
+	gameModule "./game"
 	_ "./udpClient"
-	tc "github.com/gdamore/tcell"
 )
 
 func main() {
@@ -34,62 +30,20 @@ func main() {
 	// 	return
 	// }
 	// fmt.Println(ser.DecodeGameState(buffer))
-	fmt.Println("Press enter to start game.")
-	screen, e := tc.NewScreen()
-	if e != nil {
-		fmt.Println(e)
-		fmt.Scanln()
-		return
+	game, err := gameModule.New(50, 50)
+	if err != nil {
+		log.Fatal(err)
 	}
-	if e := screen.Init(); e != nil {
-		fmt.Println(e)
-		fmt.Scanln()
-		return
-	}
-	screen.SetStyle(tc.StyleDefault)
-	screen.HideCursor()
-	h, w := 30, 90
-	writer := p.NewTerminalWriter(screen)
-	frame := f.New(h, w, '+', writer)
-	food := fd.New(10, 10, '$', writer)
-	snake := s.New(8, 8, '+', writer)
-	channel := make(chan interface{})
+	timeCurrent := time.Now()
 	go func() {
 		for {
-			event := screen.PollEvent()
-			switch keyEvent := event.(type) {
-			case *tc.EventKey:
-				switch keyEvent.Key() {
-				case tc.KeyEsc:
-					screen.Clear()
-					screen.Show()
-					screen.ShowCursor(0, 0)
-					channel <- new(interface{})
-				case tc.KeyUp:
-					snake.Go(s.Up)
-				case tc.KeyDown:
-					snake.Go(s.Down)
-				case tc.KeyLeft:
-					snake.Go(s.Left)
-				case tc.KeyRight:
-					snake.Go(s.Right)
-				}
-			}
+			timeNow := time.Now()
+			game.Logic(timeCurrent.UnixNano() - timeNow.UnixNano())
+			timeCurrent = timeNow
 		}
 	}()
 	for {
-		select {
-		case <-channel:
-			return
-
-		default:
-			screen.Clear()
-			frame.Draw()
-			food.Draw()
-			snake.Move()
-			snake.Draw()
-			screen.Show()
-			time.Sleep(time.Millisecond * 100)
-		}
+		time.Sleep(time.Millisecond * 100)
+		game.Draw()
 	}
 }

@@ -1,8 +1,8 @@
 package snake
 
 import (
-	"../point"
 	"../figure"
+	"../point"
 )
 
 type Snake struct {
