@@ -1,10 +1,10 @@
-package udpClient
+package udp
 
 import (
 	"net"
 )
 
-type UdpClient interface {
+type IUdpClient interface {
 	Read(p []byte) (int, error)
 	Write(p []byte) (int, error)
 	Close() error
@@ -14,7 +14,7 @@ type udpClient struct {
 	connection net.Conn
 }
 
-func New(ip string) (UdpClient, error) {
+func NewUdpClient(ip string) (IUdpClient, error) {
 	conn, err := net.Dial("udp", ip)
 	if err != nil {
 		return nil, err
