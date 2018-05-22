@@ -6,7 +6,6 @@ import (
 	frameModule "../frame"
 	pointModule "../point"
 	snakeModule "../snake"
-	_ "../udpClient"
 	tcellModule "github.com/gdamore/tcell"
 )
 
@@ -50,6 +49,8 @@ func (game *game) Draw() {
 	game.screen.Show()
 }
 
+const timeDeltaInNanoSecondsAfterThatSnakeMoves int64 = 100000000
+
 func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 	game.timeBuffer += timeDeltaInNanoSeconds
 	event := game.screen.PollEvent()
@@ -71,9 +72,13 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 			game.snake.Go(snakeModule.Right)
 		}
 	}
-	if game.timeBuffer >= 100000000 {
+	game.snake.TryEat(&game.food)
+	if game.snake.IsHit(game.frame.Figure) || game.snake.IsHitTail() {
+		game.snake.Reset()
+	}
+	if game.timeBuffer >= timeDeltaInNanoSecondsAfterThatSnakeMoves {
 		game.snake.Move()
-		game.timeBuffer = 0
+		game.timeBuffer -= timeDeltaInNanoSecondsAfterThatSnakeMoves
 	}
 	return true
 }
