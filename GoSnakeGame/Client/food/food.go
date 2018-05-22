@@ -1,17 +1,21 @@
 package food
 
-import "../point"
+import (
+	"math/rand"
+
+	"../point"
+)
 
 type Food struct {
 	point.Point
-	initialX int
-	initialY int
+	maxX int
+	maxY int
 }
 
-func New(x, y int, value rune, writer point.PointWriter) Food {
-	return Food{point.New(x, y, value, writer), x, y}
+func New(x, y, maxX, maxY int, value rune, writer point.PointWriter) Food {
+	return Food{point.New(x, y, value, writer), maxX, maxY}
 }
 
 func (f *Food) Reset() {
-	f.Move(f.initialX, f.initialY)
+	f.Move(rand.Intn(f.maxX), rand.Intn(f.maxY))
 }

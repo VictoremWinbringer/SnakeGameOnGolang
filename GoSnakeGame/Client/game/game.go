@@ -34,7 +34,7 @@ func New(height int, width int) (Game, error) {
 	screen.HideCursor()
 	writer := pointModule.NewTerminalWriter(screen)
 	frame := frameModule.New(height, width, '+', writer)
-	food := foodModule.New(10, 10, '$', writer)
+	food := foodModule.New(10, 10, width, height, '$', writer)
 	snake := snakeModule.New(8, 8, '+', writer)
 	return &game{frame, food, snake, screen, 0}, nil
 }

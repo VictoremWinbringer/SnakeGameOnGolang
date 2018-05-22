@@ -6,7 +6,6 @@ import (
 
 	_ "../Shared/serializer"
 	gameModule "./game"
-	_ "./udpClient"
 )
 
 func main() {
@@ -35,15 +34,25 @@ func main() {
 		log.Fatal(err)
 	}
 	timeCurrent := time.Now()
+	c := make(chan int)
 	go func() {
 		for {
 			timeNow := time.Now()
-			game.Logic(timeCurrent.UnixNano() - timeNow.UnixNano())
+			if !game.Logic(timeNow.UnixNano() - timeCurrent.UnixNano()) {
+				c <- 1
+				return
+			}
 			timeCurrent = timeNow
 		}
 	}()
 	for {
-		time.Sleep(time.Millisecond * 100)
-		game.Draw()
+		select {
+		case <-c:
+			return
+		default:
+			game.Draw()
+			time.Sleep(time.Millisecond * 100)
+		}
+
 	}
 }
