@@ -1,12 +1,10 @@
 package bll
 
-import "../dal"
-
 type point struct {
 	x      int
 	y      int
 	value  rune
-	writer dal.IPointWriter
+	writer IWriter
 }
 
 type ipoint interface {
@@ -17,7 +15,11 @@ type ipoint interface {
 	Copy() ipoint
 }
 
-func newIPoint(x, y int, value rune, writer dal.IPointWriter) ipoint {
+type IWriter interface {
+	Write(x, y int, value rune)
+}
+
+func newIPoint(x, y int, value rune, writer IWriter) ipoint {
 	return &point{x, y, value, writer}
 }
 

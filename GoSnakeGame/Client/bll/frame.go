@@ -1,9 +1,5 @@
 package bll
 
-import (
-	"../dal"
-)
-
 type frame struct {
 	figure
 }
@@ -12,7 +8,7 @@ type iframe interface {
 	isHitPoint(point ipoint) bool
 }
 
-func newIFrame(h, w int, value rune, writer dal.IPointWriter) iframe {
+func newIFrame(h, w int, value rune, writer IWriter) iframe {
 
 	points := make([]ipoint, 0)
 	points = addHorizontal(w, 0, points, value, writer)
@@ -23,14 +19,14 @@ func newIFrame(h, w int, value rune, writer dal.IPointWriter) iframe {
 	return frame{figure{points}}
 }
 
-func addHorizontal(w, y int, points []ipoint, value rune, writer dal.IPointWriter) []ipoint {
+func addHorizontal(w, y int, points []ipoint, value rune, writer IWriter) []ipoint {
 	for i := 0; i <= w; i++ {
 		points = append(points, newIPoint(i, y, value, writer))
 	}
 	return points
 }
 
-func addVertical(h, x int, points []ipoint, value rune, writer dal.IPointWriter) []ipoint {
+func addVertical(h, x int, points []ipoint, value rune, writer IWriter) []ipoint {
 	for i := 0; i <= h; i++ {
 		points = append(points, newIPoint(x, i, value, writer))
 	}

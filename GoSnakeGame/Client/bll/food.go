@@ -2,8 +2,6 @@ package bll
 
 import (
 	"math/rand"
-
-	"../dal"
 )
 
 type food struct {
@@ -17,7 +15,7 @@ type ifood interface {
 	Reset()
 }
 
-func newIFood(x, y, maxX, maxY int, value rune, writer dal.IPointWriter) ifood {
+func newIFood(x, y, maxX, maxY int, value rune, writer IWriter) ifood {
 	return food{newIPoint(x, y, value, writer), maxX, maxY}
 }
 

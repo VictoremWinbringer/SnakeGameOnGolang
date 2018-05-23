@@ -1,9 +1,5 @@
 package bll
 
-import (
-	"../dal"
-)
-
 type snake struct {
 	figure
 	direction        Direction
@@ -21,7 +17,7 @@ type isnake interface {
 	Reset()
 }
 
-func newISnake(x, y int, value rune, writer dal.IPointWriter) isnake {
+func newISnake(x, y int, value rune, writer IWriter) isnake {
 
 	points := make([]ipoint, 0)
 	initialPoints := make([]ipoint, 0)

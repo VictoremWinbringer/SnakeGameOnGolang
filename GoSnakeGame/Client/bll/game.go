@@ -2,7 +2,6 @@ package bll
 
 import (
 	"../dal"
-	tcellModule "github.com/gdamore/tcell"
 )
 
 type Command uint8
@@ -22,26 +21,21 @@ type game struct {
 	frame          iframe
 	food           ifood
 	snake          isnake
-	screen         tcellModule.Screen
+	screen         dal.IScreen
 	timeBuffer     int64
 	commandChannel chan Command
 }
 
 func NewGame(height int, width int) (IGame, error) {
-	screen, e := tcellModule.NewScreen()
-	if e != nil {
-		return nil, e
+
+	writer, err := dal.NewIPointWriter()
+	if err != nil {
+		return nil, err
 	}
-	if e := screen.Init(); e != nil {
-		return nil, e
-	}
-	screen.SetStyle(tcellModule.StyleDefault)
-	screen.HideCursor()
-	writer := dal.NewIPointWriter(screen)
 	frame := newIFrame(height, width, '+', writer)
 	food := newIFood(width/2, height/2, width, height, '$', writer)
 	snake := newISnake(width/3, height/3, '+', writer)
-	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}, nil
+	return &game{frame, food, snake, writer, 0, keyboardInput(writer)}, nil
 }
 
 func (game *game) Draw() {
@@ -55,25 +49,22 @@ func (game *game) Draw() {
 
 const timeDeltaInNanoSecondsAfterThatSnakeMoves int64 = 200000000
 
-func keyboardInput(screen tcellModule.Screen) chan Command {
+func keyboardInput(screen dal.IScreen) chan Command {
 	commandChannel := make(chan Command)
 	go func() {
 		for {
-			event := screen.PollEvent()
-			keyEvent, ok := event.(*tcellModule.EventKey)
-			if ok {
-				switch keyEvent.Key() {
-				case tcellModule.KeyUp:
-					commandChannel <- Up
-				case tcellModule.KeyDown:
-					commandChannel <- Down
-				case tcellModule.KeyLeft:
-					commandChannel <- Left
-				case tcellModule.KeyRight:
-					commandChannel <- Right
-				case tcellModule.KeyEsc:
-					commandChannel <- Exit
-				}
+			key := screen.ReadKey()
+			switch key {
+			case dal.KeyUp:
+				commandChannel <- Up
+			case dal.KeyDown:
+				commandChannel <- Down
+			case dal.KeyLeft:
+				commandChannel <- Left
+			case dal.KeyRight:
+				commandChannel <- Right
+			case dal.KeyEsc:
+				commandChannel <- Exit
 			}
 		}
 	}()
