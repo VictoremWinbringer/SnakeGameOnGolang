@@ -39,8 +39,8 @@ func NewGame(height int, width int) (IGame, error) {
 	screen.HideCursor()
 	writer := dal.NewIPointWriter(screen)
 	frame := newIFrame(height, width, '+', writer)
-	food := newIFood(10, 10, width, height, '$', writer)
-	snake := newISnake(8, 8, '+', writer)
+	food := newIFood(width/2, height/2, width, height, '$', writer)
+	snake := newISnake(width/3, height/3, '+', writer)
 	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}, nil
 }
 
@@ -53,7 +53,7 @@ func (game *game) Draw() {
 	game.screen.Show()
 }
 
-const timeDeltaInNanoSecondsAfterThatSnakeMoves int64 = 100000000
+const timeDeltaInNanoSecondsAfterThatSnakeMoves int64 = 200000000
 
 func keyboardInput(screen tcellModule.Screen) chan Command {
 	commandChannel := make(chan Command)
@@ -101,10 +101,10 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 		}
 	default:
 	}
-	game.snake.TryEat(game.food)
 	if game.snake.IsHit(game.frame) || game.snake.IsHitTail() {
 		game.snake.Reset()
 	}
+	game.snake.TryEat(game.food)
 	if game.timeBuffer >= timeDeltaInNanoSecondsAfterThatSnakeMoves {
 		game.snake.Move()
 		game.timeBuffer -= timeDeltaInNanoSecondsAfterThatSnakeMoves

@@ -28,7 +28,7 @@ func main() {
 	// 	return
 	// }
 	// fmt.Println(ser.DecodeGameState(buffer))
-	game, err := bll.New(50, 50)
+	game, err := bll.NewGame(20, 40)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func main() {
 			return
 		default:
 			game.Draw()
-			time.Sleep(time.Millisecond * 100)
+			time.Sleep(time.Millisecond * 50)
 		}
 
 	}

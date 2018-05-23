@@ -25,10 +25,10 @@ func newISnake(x, y int, value rune, writer dal.IPointWriter) isnake {
 
 	points := make([]ipoint, 0)
 	initialPoints := make([]ipoint, 0)
-	points = append(points, newIPoint(x, y, value, writer))
-	points = append(points, newIPoint(x-1, y, value, writer))
-	points = append(points, newIPoint(x-2, y, value, writer))
-	copy(initialPoints, points)
+	for i := 0; i < initialLenth; i++ {
+		points = append(points, newIPoint(x-i, y, value, writer))
+		initialPoints = append(initialPoints, newIPoint(x-i, y, value, writer))
+	}
 	return &snake{figure{(points)}, RightDirection, RightDirection, initialPoints}
 }
 
@@ -39,27 +39,30 @@ const LeftDirection Direction = 2
 const UpDirection Direction = 3
 const DownDirection Direction = 4
 
-func (s *snake) Go(direction Direction) {
-	s.direction = direction
+const initialLenth = 3
+const speed = 1
+
+func (this *snake) Go(direction Direction) {
+	this.direction = direction
 }
 
-func (s snake) Move() {
+func (this snake) Move() {
 	var oldX int
 	var oldY int
-	for i, p := range s.points {
+	for i, p := range this.points {
 		if i == 0 {
 			x, y := p.Position()
 			oldX = x
 			oldY = y
-			switch s.direction {
+			switch this.direction {
 			case RightDirection:
-				x = x + 1
+				x = x + speed
 			case LeftDirection:
-				x = x - 1
+				x = x - speed
 			case UpDirection:
-				y = y - 1
+				y = y - speed
 			case DownDirection:
-				y = y + 1
+				y = y + speed
 			}
 			p.Move(x, y)
 		} else {
@@ -68,27 +71,29 @@ func (s snake) Move() {
 			oldX = tempX
 			oldY = tempY
 		}
-		s.points[i] = p
+		this.points[i] = p
 	}
 }
 
-func (s *snake) TryEat(f ifood) {
-	if s.points[0].Overlaps(f) {
-		last := s.points[len(s.points)-1]
-		s.points = append(s.points, last)
+func (this *snake) TryEat(f ifood) {
+	if this.points[0].Overlaps(f) {
+		last := this.points[len(this.points)-1]
+		this.points = append(this.points, last.Copy())
 		f.Reset()
 	}
 }
 
-func (s *snake) Reset() {
-	s.points = make([]ipoint, 0)
-	copy(s.points, s.initialPoints)
-	s.direction = s.initialDirection
+func (this *snake) Reset() {
+	this.points = make([]ipoint, 0)
+	for _, point := range this.initialPoints {
+		this.points = append(this.points, point.Copy())
+	}
+	this.direction = this.initialDirection
 }
 
-func (s *snake) IsHitTail() bool {
-	head := s.points[0]
-	for i, p := range s.points {
+func (this *snake) IsHitTail() bool {
+	head := this.points[0]
+	for i, p := range this.points {
 		if i > 0 && head.Overlaps(p) {
 			return true
 		}
@@ -96,7 +101,7 @@ func (s *snake) IsHitTail() bool {
 	return false
 }
 
-func (s *snake) IsHit(f iframe) bool {
-	head := s.points[0]
-	return f.isHitPoint(head)
+func (this *snake) IsHit(frame iframe) bool {
+	head := this.points[0]
+	return frame.isHitPoint(head)
 }

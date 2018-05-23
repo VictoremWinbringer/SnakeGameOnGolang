@@ -14,6 +14,7 @@ type ipoint interface {
 	Draw()
 	Overlaps(other ipoint) bool
 	Position() (x int, y int)
+	Copy() ipoint
 }
 
 func newIPoint(x, y int, value rune, writer dal.IPointWriter) ipoint {
@@ -35,4 +36,8 @@ func (this point) Overlaps(other ipoint) bool {
 }
 func (this point) Position() (x int, y int) {
 	return this.x, this.y
+}
+
+func (this point) Copy() ipoint {
+	return &point{this.x, this.y, this.value, this.writer}
 }

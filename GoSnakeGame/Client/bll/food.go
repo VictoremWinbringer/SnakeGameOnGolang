@@ -21,6 +21,14 @@ func newIFood(x, y, maxX, maxY int, value rune, writer dal.IPointWriter) ifood {
 	return food{newIPoint(x, y, value, writer), maxX, maxY}
 }
 
-func (f food) Reset() {
-	f.Move(rand.Intn(f.maxX), rand.Intn(f.maxY))
+func (this food) Reset() {
+	x := rand.Intn(this.maxX)
+	y := rand.Intn(this.maxY)
+	if x < 1 {
+		x = 1
+	}
+	if y < 1 {
+		y = 1
+	}
+	this.Move(x, y)
 }
