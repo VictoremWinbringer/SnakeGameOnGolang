@@ -5,9 +5,11 @@ import (
 )
 
 type frame struct {
-	ifigure
+	figure
 }
 type iframe interface {
+	Draw()
+	isHitPoint(point ipoint) bool
 }
 
 func newIFrame(h, w int, value rune, writer dal.IPointWriter) iframe {
@@ -33,4 +35,13 @@ func addVertical(h, x int, points []ipoint, value rune, writer dal.IPointWriter)
 		points = append(points, newIPoint(x, i, value, writer))
 	}
 	return points
+}
+
+func (this frame) isHitPoint(point ipoint) bool {
+	for _, p := range this.points {
+		if p.Overlaps(point) {
+			return true
+		}
+	}
+	return false
 }

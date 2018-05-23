@@ -17,10 +17,10 @@ type ifood interface {
 	Reset()
 }
 
-func NewIFood(x, y, maxX, maxY int, value rune, writer dal.IPointWriter) Food {
-	return Food{newIPoint(x, y, value, writer), maxX, maxY}
+func newIFood(x, y, maxX, maxY int, value rune, writer dal.IPointWriter) ifood {
+	return food{newIPoint(x, y, value, writer), maxX, maxY}
 }
 
-func (f *food) Reset() {
+func (f food) Reset() {
 	f.Move(rand.Intn(f.maxX), rand.Intn(f.maxY))
 }

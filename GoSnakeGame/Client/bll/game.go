@@ -19,7 +19,7 @@ type IGame interface {
 }
 
 type game struct {
-	frame          Iframe
+	frame          iframe
 	food           ifood
 	snake          isnake
 	screen         tcellModule.Screen
@@ -41,7 +41,7 @@ func NewGame(height int, width int) (IGame, error) {
 	frame := newIFrame(height, width, '+', writer)
 	food := newIFood(10, 10, width, height, '$', writer)
 	snake := newISnake(8, 8, '+', writer)
-	return &game{&frame, &food, &snake, screen, 0, keyboardInput(screen)}, nil
+	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}, nil
 }
 
 func (game *game) Draw() {
@@ -86,13 +86,13 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 	case command := <-game.commandChannel:
 		switch command {
 		case Up:
-			game.snake.Go(Up)
+			game.snake.Go(UpDirection)
 		case Down:
-			game.snake.Go(Down)
+			game.snake.Go(DownDirection)
 		case Left:
-			game.snake.Go(Left)
+			game.snake.Go(LeftDirection)
 		case Right:
-			game.snake.Go(Right)
+			game.snake.Go(RightDirection)
 		case Exit:
 			game.screen.Clear()
 			game.screen.ShowCursor(0, 0)
@@ -102,7 +102,7 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 	default:
 	}
 	game.snake.TryEat(game.food)
-	if game.snake.IsHit(game.frame.Figure) || game.snake.IsHitTail() {
+	if game.snake.IsHit(game.frame) || game.snake.IsHitTail() {
 		game.snake.Reset()
 	}
 	if game.timeBuffer >= timeDeltaInNanoSecondsAfterThatSnakeMoves {
