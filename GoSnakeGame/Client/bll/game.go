@@ -28,7 +28,7 @@ type game struct {
 
 func NewGame(height int, width int) (IGame, error) {
 
-	writer, err := dal.NewIPointWriter()
+	writer, err := dal.NewIScreen()
 	if err != nil {
 		return nil, err
 	}

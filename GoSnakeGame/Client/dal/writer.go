@@ -23,7 +23,7 @@ const KeyDown Key = 3
 const KeyLeft Key = 4
 const KeyRight Key = 5
 
-func NewIPointWriter() (IScreen, error) {
+func NewIScreen() (IScreen, error) {
 	s, e := tc.NewScreen()
 	if e != nil {
 		return nil, e
