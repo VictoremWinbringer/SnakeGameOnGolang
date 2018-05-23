@@ -1,27 +1,28 @@
-package snake
+package bll
 
 import (
-	"../figure"
-	"../food"
-	"../point"
+	"../dal"
 )
 
-type Snake struct {
-	figure.Figure
+type snake struct {
+	figure
 	direction        Direction
 	initialDirection Direction
-	initialPoints    []point.Point
+	initialPoints    []ipoint
 }
 
-func New(x, y int, value rune, writer point.PointWriter) Snake {
+type isnake interface {
+}
 
-	points := make([]point.Point, 0)
-	initialPoints := make([]point.Point, 0)
-	points = append(points, point.New(x, y, value, writer))
-	points = append(points, point.New(x-1, y, value, writer))
-	points = append(points, point.New(x-2, y, value, writer))
+func newISnake(x, y int, value rune, writer dal.IPointWriter) isnake {
+
+	points := make([]ipoint, 0)
+	initialPoints := make([]ipoint, 0)
+	points = append(points, newIPoint(x, y, value, writer))
+	points = append(points, newIPoint(x-1, y, value, writer))
+	points = append(points, newIPoint(x-2, y, value, writer))
 	copy(initialPoints, points)
-	return Snake{figure.New(points), Right, Right, initialPoints}
+	return snake{figure{(points)}, Right, Right, initialPoints}
 }
 
 type Direction uint8
@@ -31,11 +32,11 @@ const Left Direction = 2
 const Up Direction = 3
 const Down Direction = 4
 
-func (s *Snake) Go(direction Direction) {
+func (s *isnake) Go(direction Direction) {
 	s.direction = direction
 }
 
-func (s *Snake) Move() {
+func (s *isnake) Move() {
 	var oldX int
 	var oldY int
 	for i, p := range s.Points {
@@ -64,21 +65,21 @@ func (s *Snake) Move() {
 	}
 }
 
-func (s *Snake) TryEat(f *food.Food) {
-	if s.Figure.Points[0].Overlaps(f.Point) {
+func (s *snake) TryEat(f ifood) {
+	if s.Points[0].Overlaps(f.Point) {
 		last := s.Points[len(s.Points)-1]
 		s.Points = append(s.Points, last)
 		f.Reset()
 	}
 }
 
-func (s *Snake) Reset() {
-	s.Points = make([]point.Point, 0)
+func (s *snake) Reset() {
+	s.Points = make([]ipoint, 0)
 	copy(s.Points, s.initialPoints)
 	s.direction = s.initialDirection
 }
 
-func (s *Snake) IsHitTail() bool {
+func (s *snake) IsHitTail() bool {
 	head := s.Points[0]
 	for i, p := range s.Points {
 		if i > 0 && head.Overlaps(p) {
@@ -88,7 +89,7 @@ func (s *Snake) IsHitTail() bool {
 	return false
 }
 
-func (s *Snake) IsHit(f figure.Figure) bool {
+func (s *snake) IsHit(f figure) bool {
 	head := s.Points[0]
 	return f.IsHitPoint(head)
 }

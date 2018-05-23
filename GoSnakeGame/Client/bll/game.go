@@ -1,11 +1,7 @@
-package game
+package bll
 
 import (
-	_ "../../Shared/serializer"
-	foodModule "../food"
-	frameModule "../frame"
-	pointModule "../point"
-	snakeModule "../snake"
+	"../dal"
 	tcellModule "github.com/gdamore/tcell"
 )
 
@@ -23,15 +19,15 @@ type IGame interface {
 }
 
 type game struct {
-	frame          *frameModule.Frame
-	food           *foodModule.Food
-	snake          *snakeModule.Snake
+	frame          Iframe
+	food           ifood
+	snake          isnake
 	screen         tcellModule.Screen
 	timeBuffer     int64
 	commandChannel chan Command
 }
 
-func New(height int, width int) (IGame, error) {
+func NewGame(height int, width int) (IGame, error) {
 	screen, e := tcellModule.NewScreen()
 	if e != nil {
 		return nil, e
@@ -41,10 +37,10 @@ func New(height int, width int) (IGame, error) {
 	}
 	screen.SetStyle(tcellModule.StyleDefault)
 	screen.HideCursor()
-	writer := pointModule.NewTerminalWriter(screen)
-	frame := frameModule.New(height, width, '+', writer)
-	food := foodModule.New(10, 10, width, height, '$', writer)
-	snake := snakeModule.New(8, 8, '+', writer)
+	writer := dal.NewIPointWriter(screen)
+	frame := newIFrame(height, width, '+', writer)
+	food := newIFood(10, 10, width, height, '$', writer)
+	snake := newISnake(8, 8, '+', writer)
 	return &game{&frame, &food, &snake, screen, 0, keyboardInput(screen)}, nil
 }
 
@@ -90,13 +86,13 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 	case command := <-game.commandChannel:
 		switch command {
 		case Up:
-			game.snake.Go(snakeModule.Up)
+			game.snake.Go(Up)
 		case Down:
-			game.snake.Go(snakeModule.Down)
+			game.snake.Go(Down)
 		case Left:
-			game.snake.Go(snakeModule.Left)
+			game.snake.Go(Left)
 		case Right:
-			game.snake.Go(snakeModule.Right)
+			game.snake.Go(Right)
 		case Exit:
 			game.screen.Clear()
 			game.screen.ShowCursor(0, 0)

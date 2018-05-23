@@ -4,8 +4,7 @@ import (
 	"log"
 	"time"
 
-	_ "../Shared/serializer"
-	gameModule "./game"
+	"./bll"
 )
 
 func main() {
@@ -29,7 +28,7 @@ func main() {
 	// 	return
 	// }
 	// fmt.Println(ser.DecodeGameState(buffer))
-	game, err := gameModule.New(50, 50)
+	game, err := bll.New(50, 50)
 	if err != nil {
 		log.Fatal(err)
 	}
