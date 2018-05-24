@@ -28,7 +28,7 @@ func (this food) Reset() {
 }
 
 func (this food) move(x, y int) {
-	head := this.points.Head()
+	head := this.points.First()
 	head.X = x
 	head.Y = y
 }

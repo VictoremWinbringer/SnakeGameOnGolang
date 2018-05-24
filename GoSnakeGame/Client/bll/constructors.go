@@ -39,46 +39,47 @@ func keyboardInput(screen dal.IScreen) chan Command {
 	return commandChannel
 }
 
-func newISnake(list dal.ILinkedList, writer IWriter) isnake {
+func newISnake(list dal.IPointRepository, writer IWriter) isnake {
 	initialPoints := make([]domainModels.Point, 0)
-	for i := list.Next(); i != nil; i = list.Next() {
-		initialPoints = append(initialPoints, domainModels.Point{i.X, i.Y, i.Symbol})
-	}
+	list.ForEach(func(i int, p *domainModels.Point) error {
+		initialPoints = append(initialPoints, domainModels.Point{p.X, p.Y, p.Symbol})
+		return nil
+	})
 	return &snake{figure{list, writer}, RightDirection, RightDirection, initialPoints}
 }
 
-func newIFigure(list dal.ILinkedList, writer IWriter) ifigure {
+func newIFigure(list dal.IPointRepository, writer IWriter) ifigure {
 	return figure{list, writer}
 }
 
-func newIFood(list dal.ILinkedList, writer IWriter, maxX, maxY int) ifood {
+func newIFood(list dal.IPointRepository, writer IWriter, maxX, maxY int) ifood {
 	return food{figure{list, writer}, maxX, maxY}
 }
 
 const initialLenth = 3
 
-func createSnake(x, y int, value rune) dal.ILinkedList {
+func createSnake(x, y int, value rune) dal.IPointRepository {
 	points := make([]domainModels.Point, 0)
 	for i := 0; i < initialLenth; i++ {
 		points = append(points, domainModels.Point{x - i, y, value})
 	}
-	return dal.NewILinkedListWithData(points)
+	return dal.NewIPointRepositoryWithData(points)
 }
 
-func createFood(x, y int, value rune) dal.ILinkedList {
+func createFood(x, y int, value rune) dal.IPointRepository {
 
 	points := make([]domainModels.Point, 0)
 	points = append(points, domainModels.Point{x, y, value})
-	return dal.NewILinkedListWithData(points)
+	return dal.NewIPointRepositoryWithData(points)
 }
 
-func createFigure(h, w int, value rune) dal.ILinkedList {
+func createFigure(h, w int, value rune) dal.IPointRepository {
 	points := make([]domainModels.Point, 0)
 	points = addHorizontal(w, 0, value, points)
 	points = addHorizontal(w, h, value, points)
 	points = addVertical(h, 0, value, points)
 	points = addVertical(h, w, value, points)
-	return dal.NewILinkedListWithData(points)
+	return dal.NewIPointRepositoryWithData(points)
 }
 
 func addHorizontal(w, y int, value rune, points []domainModels.Point) []domainModels.Point {

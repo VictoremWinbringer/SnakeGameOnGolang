@@ -37,33 +37,36 @@ func (this *snake) Go(direction Direction) {
 func (this snake) Move() {
 	var oldX int
 	var oldY int
-	p := this.points.Next()
-	x, y := p.X, p.Y
-	oldX = x
-	oldY = y
-	switch this.direction {
-	case RightDirection:
-		x = x + speed
-	case LeftDirection:
-		x = x - speed
-	case UpDirection:
-		y = y - speed
-	case DownDirection:
-		y = y + speed
-	}
-	p.X = x
-	p.Y = y
-	for p = this.points.Next(); p != nil; p = this.points.Next() {
-		tempX, tempY := p.X, p.Y
-		p.X, p.Y = oldX, oldY
-		oldX = tempX
-		oldY = tempY
-	}
+	this.points.ForEach(func(i int, p *domainModels.Point) error {
+		if i == 0 {
+			x, y := p.X, p.Y
+			oldX = x
+			oldY = y
+			switch this.direction {
+			case RightDirection:
+				x = x + speed
+			case LeftDirection:
+				x = x - speed
+			case UpDirection:
+				y = y - speed
+			case DownDirection:
+				y = y + speed
+			}
+			p.X = x
+			p.Y = y
+		} else {
+			tempX, tempY := p.X, p.Y
+			p.X, p.Y = oldX, oldY
+			oldX = tempX
+			oldY = tempY
+		}
+		return nil
+	})
 }
 
 func (this *snake) TryEat(f ifood) {
-	if f.isHit(*this.points.Head()) {
-		this.points.AddToEnd(*this.points.Last())
+	if f.isHit(*this.points.First()) {
+		this.points.Add(*this.points.Last())
 		f.Reset()
 	}
 }
@@ -72,20 +75,22 @@ func (this *snake) Reset() {
 	points := make([]domainModels.Point, len(this.initialPoints))
 	copy(points, this.initialPoints)
 	this.direction = this.initialDirection
-	this.points = dal.NewILinkedListWithData(points)
+	this.points = dal.NewIPointRepositoryWithData(points)
 }
 
 func (this *snake) IsHitTail() bool {
-	head := this.points.Next()
-	for p := this.points.Next(); p != nil; p = this.points.Next() {
-		if p.X == head.X && p.Y == head.Y {
-			return true
+	head := this.points.First()
+	isHit := false
+	this.points.ForEach(func(i int, p *domainModels.Point) error {
+		if i != 0 && p.X == head.X && p.Y == head.Y {
+			isHit = true
 		}
-	}
-	return false
+		return nil
+	})
+	return isHit
 }
 
 func (this *snake) IsHit(frame ifigure) bool {
-	head := this.points.Head()
+	head := this.points.First()
 	return frame.isHit(*head)
 }

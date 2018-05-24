@@ -6,7 +6,7 @@ import (
 )
 
 type figure struct {
-	points dal.ILinkedList
+	points dal.IPointRepository
 	writer IWriter
 }
 
@@ -16,16 +16,19 @@ type ifigure interface {
 }
 
 func (this figure) draw() {
-	for p := this.points.Next(); p != nil; p = this.points.Next() {
+	this.points.ForEach(func(i int, p *domainModels.Point) error {
 		this.writer.Write(p.X, p.Y, p.Symbol)
-	}
+		return nil
+	})
 }
 
 func (this figure) isHit(point domainModels.Point) bool {
-	for p := this.points.Next(); p != nil; p = this.points.Next() {
+	isHit := false
+	this.points.ForEach(func(i int, p *domainModels.Point) error {
 		if p.X == point.X && p.Y == point.Y {
-			return true
+			isHit = true
 		}
-	}
-	return false
+		return nil
+	})
+	return isHit
 }
