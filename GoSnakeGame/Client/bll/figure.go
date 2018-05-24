@@ -1,11 +1,31 @@
 package bll
 
+import (
+	"../dal"
+	"../domainModels"
+)
+
 type figure struct {
-	points []ipoint
+	points dal.ILinkedList
+	writer IWriter
 }
 
-func (this figure) Draw() {
-	for i := range this.points {
-		this.points[i].Draw()
+type ifigure interface {
+	draw()
+	isHit(point domainModels.Point) bool
+}
+
+func (this figure) draw() {
+	for p := this.points.Next(); p != nil; p = this.points.Next() {
+		this.writer.Write(p.X, p.Y, p.Symbol)
 	}
+}
+
+func (this figure) isHit(point domainModels.Point) bool {
+	for p := this.points.Next(); p != nil; p = this.points.Next() {
+		if p.X == point.X && p.Y == point.Y {
+			return true
+		}
+	}
+	return false
 }

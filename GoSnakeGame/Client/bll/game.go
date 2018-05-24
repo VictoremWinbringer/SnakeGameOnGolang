@@ -18,7 +18,7 @@ type IGame interface {
 }
 
 type game struct {
-	frame          iframe
+	frame          ifigure
 	food           ifood
 	snake          isnake
 	screen         dal.IScreen
@@ -26,50 +26,16 @@ type game struct {
 	commandChannel chan Command
 }
 
-func NewGame(height int, width int) (IGame, error) {
-
-	writer, err := dal.NewIScreen()
-	if err != nil {
-		return nil, err
-	}
-	frame := newIFrame(height, width, '+', writer)
-	food := newIFood(width/2, height/2, width, height, '$', writer)
-	snake := newISnake(width/3, height/3, '+', writer)
-	return &game{frame, food, snake, writer, 0, keyboardInput(writer)}, nil
-}
-
 func (game *game) Draw() {
 
 	game.screen.Clear()
-	game.frame.Draw()
-	game.food.Draw()
-	game.snake.Draw()
+	game.frame.draw()
+	game.food.draw()
+	game.snake.draw()
 	game.screen.Show()
 }
 
 const timeDeltaInNanoSecondsAfterThatSnakeMoves int64 = 200000000
-
-func keyboardInput(screen dal.IScreen) chan Command {
-	commandChannel := make(chan Command)
-	go func() {
-		for {
-			key := screen.ReadKey()
-			switch key {
-			case dal.KeyUp:
-				commandChannel <- Up
-			case dal.KeyDown:
-				commandChannel <- Down
-			case dal.KeyLeft:
-				commandChannel <- Left
-			case dal.KeyRight:
-				commandChannel <- Right
-			case dal.KeyEsc:
-				commandChannel <- Exit
-			}
-		}
-	}()
-	return commandChannel
-}
 
 func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 	game.timeBuffer += timeDeltaInNanoSeconds

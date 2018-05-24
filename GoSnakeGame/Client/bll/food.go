@@ -5,18 +5,14 @@ import (
 )
 
 type food struct {
-	ipoint
+	figure
 	maxX int
 	maxY int
 }
 
 type ifood interface {
-	ipoint
+	ifigure
 	Reset()
-}
-
-func newIFood(x, y, maxX, maxY int, value rune, writer IWriter) ifood {
-	return food{newIPoint(x, y, value, writer), maxX, maxY}
 }
 
 func (this food) Reset() {
@@ -28,5 +24,11 @@ func (this food) Reset() {
 	if y < 1 {
 		y = 1
 	}
-	this.Move(x, y)
+	this.move(x, y)
+}
+
+func (this food) move(x, y int) {
+	head := this.points.Head()
+	head.X = x
+	head.Y = y
 }
