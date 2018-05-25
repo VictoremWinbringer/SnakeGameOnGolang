@@ -14,7 +14,7 @@ type Handler interface {
 	Hanle(requestData []byte, clientId int) []byte
 }
 type server struct {
-	udpServer udpModule.IUdpServer
+	udpServer udpModule.IUdpListener
 	handler   Handler
 	clients   map[udpModule.Connection]int
 }
@@ -36,7 +36,7 @@ func (s server) Start() error {
 	return nil
 }
 
-func liscen(ser udpModule.IUdpServer, h Handler, clients map[udpModule.Connection]int) {
+func liscen(ser udpModule.IUdpListener, h Handler, clients map[udpModule.Connection]int) {
 	defer func() {
 		ser.Close()
 	}()
@@ -57,7 +57,7 @@ func liscen(ser udpModule.IUdpServer, h Handler, clients map[udpModule.Connectio
 	}
 }
 
-func sendResponse(ser udpModule.IUdpServer, p []byte, h Handler, addr udpModule.Connection, id int) {
+func sendResponse(ser udpModule.IUdpListener, p []byte, h Handler, addr udpModule.Connection, id int) {
 	_, err := ser.Write(h.Hanle(p, id), addr)
 	if err != nil {
 		fmt.Printf("Couldn't send response %v", err)

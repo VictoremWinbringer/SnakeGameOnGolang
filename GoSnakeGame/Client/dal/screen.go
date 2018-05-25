@@ -8,6 +8,7 @@ type IScreen interface {
 	Clear()
 	ShowCursor(x, y int)
 	ReadKey() Key
+	Close()
 }
 
 type screen struct {
@@ -57,4 +58,8 @@ func (this screen) ReadKey() Key {
 
 func (this screen) ShowCursor(x, y int) {
 	this.screen.ShowCursor(x, y)
+}
+
+func (this screen) Close() {
+	this.screen.Fini()
 }

@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-type IUdpServer interface {
+type IUdpListener interface {
 	Read(buffer []byte) (int, Connection, error)
 	Write(buffer []byte, address Connection) (int, error)
 	Close() error
@@ -17,7 +17,7 @@ type server struct {
 
 type Connection *net.UDPAddr
 
-func NewUdpServer(port int, ip string) (IUdpServer, error) {
+func NewUdpServer(port int, ip string) (IUdpListener, error) {
 	if port <= 0 {
 		return nil, fmt.Errorf("port <= 0 and is is %v", port)
 	}

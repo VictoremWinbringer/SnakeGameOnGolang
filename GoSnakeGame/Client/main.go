@@ -34,6 +34,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		screen.Close()
+	}()
 	bllFactory := bll.NewBllFactory(dalFactory, screen)
 	game := bll.NewGame(20, 40, bllFactory, screen)
 	timeCurrent := time.Now()
