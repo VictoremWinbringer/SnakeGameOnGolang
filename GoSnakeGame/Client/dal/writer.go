@@ -23,19 +23,6 @@ const KeyDown Key = 3
 const KeyLeft Key = 4
 const KeyRight Key = 5
 
-func NewIScreen() (IScreen, error) {
-	s, e := tc.NewScreen()
-	if e != nil {
-		return nil, e
-	}
-	if e := s.Init(); e != nil {
-		return nil, e
-	}
-	s.SetStyle(tc.StyleDefault)
-	s.HideCursor()
-	return screen{s}, nil
-}
-
 func (this screen) Write(x, y int, value rune) {
 	this.screen.SetContent(x, y, value, nil, tc.StyleDefault)
 }

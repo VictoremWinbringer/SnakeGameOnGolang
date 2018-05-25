@@ -13,18 +13,12 @@ type IPointRepository interface {
 	Last() *domainModels.Point
 	Count() int
 	ForEach(func(i int, point *domainModels.Point) error) error
+	Clear()
 }
 
-func NewIPointRepositoryWithData(points []domainModels.Point) IPointRepository {
-	repository := NewIPointRepository()
-	for _, p := range points {
-		repository.Add(p)
-	}
-	return repository
-}
-
-func NewIPointRepository() IPointRepository {
-	return &pointRepository{make([]domainModels.Point, 0), 0}
+func (this *pointRepository) Clear() {
+	this.points = make([]domainModels.Point, 0)
+	this.count = 0
 }
 
 func (this *pointRepository) Count() int {

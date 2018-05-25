@@ -26,6 +26,35 @@ type game struct {
 	commandChannel chan Command
 }
 
+func NewGame(height int, width int, factory IBllFactory, screen dal.IScreen) IGame {
+	frame := bllFactory.CrateFrame(height, width, '+')
+	food := bllFactory.CreateFood(width/2, height/2, '$', width, height)
+	snake := bllFactory.CreateSnake(width/3, height/3, '+')
+	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}
+}
+
+func keyboardInput(screen dal.IScreen) chan Command {
+	commandChannel := make(chan Command)
+	go func() {
+		for {
+			key := screen.ReadKey()
+			switch key {
+			case dal.KeyUp:
+				commandChannel <- Up
+			case dal.KeyDown:
+				commandChannel <- Down
+			case dal.KeyLeft:
+				commandChannel <- Left
+			case dal.KeyRight:
+				commandChannel <- Right
+			case dal.KeyEsc:
+				commandChannel <- Exit
+			}
+		}
+	}()
+	return commandChannel
+}
+
 func (game *game) Draw() {
 
 	game.screen.Clear()

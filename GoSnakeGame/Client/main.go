@@ -28,10 +28,16 @@ func main() {
 	// 	return
 	// }
 	// fmt.Println(ser.DecodeGameState(buffer))
-	game, err := bll.NewGame(20, 40)
+	dalFactory := dal.CreateDalFactory()
+	screen, err := dalFactory.CreateScreen()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer func() {
+		screen.Close()
+	}()
+	bllFactory := NewBllFactory(dalFactory, screen)
+	game := bll.NewGame(20, 40, bllFactory, screen)
 	timeCurrent := time.Now()
 	c := make(chan int)
 	go func() {

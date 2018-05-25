@@ -1,7 +1,6 @@
 package bll
 
 import (
-	"../dal"
 	"../domainModels"
 )
 
@@ -75,7 +74,10 @@ func (this *snake) Reset() {
 	points := make([]domainModels.Point, len(this.initialPoints))
 	copy(points, this.initialPoints)
 	this.direction = this.initialDirection
-	this.points = dal.NewIPointRepositoryWithData(points)
+	this.points.Clear()
+	for _, p := range points {
+		this.points.Add(p)
+	}
 }
 
 func (this *snake) IsHitTail() bool {
