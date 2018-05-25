@@ -1,49 +1,49 @@
 package dal
 
-import "../domainModels"
+import "../model"
 
 type pointRepository struct {
-	points []domainModels.Point
+	points []model.Point
 	count  int
 }
 
 type IPointRepository interface {
-	Add(domainModels.Point)
-	First() *domainModels.Point
-	Last() *domainModels.Point
+	Add(model.Point)
+	First() *model.Point
+	Last() *model.Point
 	Count() int
-	ForEach(func(i int, point *domainModels.Point) error) error
+	ForEach(func(i int, point *model.Point) error) error
 	Clear()
 }
 
 func (this *pointRepository) Clear() {
-	this.points = make([]domainModels.Point, 0)
+	this.points = make([]model.Point, 0)
 	this.count = 0
 }
 
 func (this *pointRepository) Count() int {
 	return this.count
 }
-func (this *pointRepository) Add(point domainModels.Point) {
+func (this *pointRepository) Add(point model.Point) {
 	this.points = append(this.points, point)
 	this.count += 1
 }
 
-func (this *pointRepository) First() *domainModels.Point {
+func (this *pointRepository) First() *model.Point {
 	if this.count < 1 {
 		return nil
 	}
 	return &this.points[0]
 }
 
-func (this *pointRepository) Last() *domainModels.Point {
+func (this *pointRepository) Last() *model.Point {
 	if this.count < 1 {
 		return nil
 	}
 	return &this.points[this.count-1]
 }
 
-func (this *pointRepository) ForEach(action func(i int, point *domainModels.Point) error) error {
+func (this *pointRepository) ForEach(action func(i int, point *model.Point) error) error {
 	for i, p := range this.points {
 		err := action(i, &p)
 		if err != nil {

@@ -2,7 +2,7 @@ package bll
 
 import (
 	"../dal"
-	"../domainModels"
+	"../model"
 )
 
 type IBllFactory interface {
@@ -26,25 +26,25 @@ func (this bllFactory) CrateFrame(h, w int, value rune) ifigure {
 }
 
 func (this bllFactory) CreateSnake(x, y int, value rune) isnake {
-	points := make([]domainModels.Point, 0)
+	points := make([]model.Point, 0)
 	for i := 0; i < initialLenth; i++ {
-		points = append(points, domainModels.Point{x - i, y, value})
+		points = append(points, model.Point{x - i, y, value})
 	}
-	initialPoints := make([]domainModels.Point, initialLenth)
+	initialPoints := make([]model.Point, initialLenth)
 	copy(initialPoints, points)
 	return &snake{figure{this.dalFactory.CreatePointRepository(points...), this.writer}, RightDirection, RightDirection, initialPoints}
 }
 
 func (this bllFactory) CreateFood(x, y int, value rune, maxX, maxY int) ifood {
-	points := make([]domainModels.Point, 0)
-	points = append(points, domainModels.Point{x, y, value})
+	points := make([]model.Point, 0)
+	points = append(points, model.Point{x, y, value})
 	return food{figure{this.dalFactory.CreatePointRepository(points...), this.writer}, maxX, maxY}
 }
 
 const initialLenth = 3
 
-func createFrame(h, w int, value rune) []domainModels.Point {
-	points := make([]domainModels.Point, 0)
+func createFrame(h, w int, value rune) []model.Point {
+	points := make([]model.Point, 0)
 	points = addHorizontal(w, 0, value, points)
 	points = addHorizontal(w, h, value, points)
 	points = addVertical(h, 0, value, points)
@@ -52,16 +52,16 @@ func createFrame(h, w int, value rune) []domainModels.Point {
 	return points
 }
 
-func addHorizontal(w, y int, value rune, points []domainModels.Point) []domainModels.Point {
+func addHorizontal(w, y int, value rune, points []model.Point) []model.Point {
 	for i := 0; i <= w; i++ {
-		points = append(points, domainModels.Point{i, y, value})
+		points = append(points, model.Point{i, y, value})
 	}
 	return points
 }
 
-func addVertical(h, x int, value rune, points []domainModels.Point) []domainModels.Point {
+func addVertical(h, x int, value rune, points []model.Point) []model.Point {
 	for i := 0; i <= h; i++ {
-		points = append(points, domainModels.Point{x, i, value})
+		points = append(points, model.Point{x, i, value})
 	}
 	return points
 }

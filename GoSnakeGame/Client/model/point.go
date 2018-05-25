@@ -1,4 +1,4 @@
-package domainModels
+package model
 
 type Point struct {
 	X      int

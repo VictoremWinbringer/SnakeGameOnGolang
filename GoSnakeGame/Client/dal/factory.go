@@ -1,12 +1,12 @@
 package dal
 
 import (
-	"../domainModels"
+	"../model"
 	tc "github.com/gdamore/tcell"
 )
 
 type IDalFactory interface {
-	CreatePointRepository(points ...domainModels.Point) IPointRepository
+	CreatePointRepository(points ...model.Point) IPointRepository
 	CreateScreen() (IScreen, error)
 }
 
@@ -17,8 +17,8 @@ func CreateDalFactory() IDalFactory {
 	return dalFactory{}
 }
 
-func (this dalFactory) CreatePointRepository(points ...domainModels.Point) IPointRepository {
-	repository := pointRepository{make([]domainModels.Point, 0), 0}
+func (this dalFactory) CreatePointRepository(points ...model.Point) IPointRepository {
+	repository := pointRepository{make([]model.Point, 0), 0}
 	for _, p := range points {
 		repository.Add(p)
 	}

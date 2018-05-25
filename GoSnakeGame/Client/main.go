@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"./bll"
+	"./dal"
 )
 
 func main() {
@@ -33,10 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		screen.Close()
-	}()
-	bllFactory := NewBllFactory(dalFactory, screen)
+	bllFactory := bll.NewBllFactory(dalFactory, screen)
 	game := bll.NewGame(20, 40, bllFactory, screen)
 	timeCurrent := time.Now()
 	c := make(chan int)
@@ -56,7 +54,7 @@ func main() {
 			return
 		default:
 			game.Draw()
-			time.Sleep(time.Millisecond * 50)
+			time.Sleep(time.Millisecond * 18)
 		}
 
 	}

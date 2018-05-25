@@ -2,7 +2,7 @@ package bll
 
 import (
 	"../dal"
-	"../domainModels"
+	"../model"
 )
 
 type figure struct {
@@ -12,19 +12,19 @@ type figure struct {
 
 type ifigure interface {
 	draw()
-	isHit(point domainModels.Point) bool
+	isHit(point model.Point) bool
 }
 
 func (this figure) draw() {
-	this.points.ForEach(func(i int, p *domainModels.Point) error {
+	this.points.ForEach(func(i int, p *model.Point) error {
 		this.writer.Write(p.X, p.Y, p.Symbol)
 		return nil
 	})
 }
 
-func (this figure) isHit(point domainModels.Point) bool {
+func (this figure) isHit(point model.Point) bool {
 	isHit := false
-	this.points.ForEach(func(i int, p *domainModels.Point) error {
+	this.points.ForEach(func(i int, p *model.Point) error {
 		if p.X == point.X && p.Y == point.Y {
 			isHit = true
 		}

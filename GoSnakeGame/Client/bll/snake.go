@@ -1,14 +1,14 @@
 package bll
 
 import (
-	"../domainModels"
+	"../model"
 )
 
 type snake struct {
 	figure
 	direction        Direction
 	initialDirection Direction
-	initialPoints    []domainModels.Point
+	initialPoints    []model.Point
 }
 
 type isnake interface {
@@ -36,7 +36,7 @@ func (this *snake) Go(direction Direction) {
 func (this snake) Move() {
 	var oldX int
 	var oldY int
-	this.points.ForEach(func(i int, p *domainModels.Point) error {
+	this.points.ForEach(func(i int, p *model.Point) error {
 		if i == 0 {
 			x, y := p.X, p.Y
 			oldX = x
@@ -71,7 +71,7 @@ func (this *snake) TryEat(f ifood) {
 }
 
 func (this *snake) Reset() {
-	points := make([]domainModels.Point, len(this.initialPoints))
+	points := make([]model.Point, len(this.initialPoints))
 	copy(points, this.initialPoints)
 	this.direction = this.initialDirection
 	this.points.Clear()
@@ -83,7 +83,7 @@ func (this *snake) Reset() {
 func (this *snake) IsHitTail() bool {
 	head := this.points.First()
 	isHit := false
-	this.points.ForEach(func(i int, p *domainModels.Point) error {
+	this.points.ForEach(func(i int, p *model.Point) error {
 		if i != 0 && p.X == head.X && p.Y == head.Y {
 			isHit = true
 		}

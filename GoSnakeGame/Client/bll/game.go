@@ -27,9 +27,9 @@ type game struct {
 }
 
 func NewGame(height int, width int, factory IBllFactory, screen dal.IScreen) IGame {
-	frame := bllFactory.CrateFrame(height, width, '+')
-	food := bllFactory.CreateFood(width/2, height/2, '$', width, height)
-	snake := bllFactory.CreateSnake(width/3, height/3, '+')
+	frame := factory.CrateFrame(height, width, '+')
+	food := factory.CreateFood(width/2, height/2, '$', width, height)
+	snake := factory.CreateSnake(width/3, height/3, '+')
 	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}
 }
 
