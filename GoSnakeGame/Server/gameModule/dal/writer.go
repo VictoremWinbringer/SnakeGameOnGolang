@@ -6,6 +6,15 @@ type IWriter interface {
 	Clear()
 }
 
+type Key uint8
+
+const KeyUndefined Key = 0
+const KeyEsc Key = 1
+const KeyUp Key = 2
+const KeyDown Key = 3
+const KeyLeft Key = 4
+const KeyRight Key = 5
+
 type writer struct {
 	data   [][]rune
 	height int
