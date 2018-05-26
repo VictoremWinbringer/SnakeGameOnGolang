@@ -10,12 +10,12 @@ type figure struct {
 	writer IWriter
 }
 
-type ifigure interface {
-	draw()
+type IFigure interface {
+	Draw()
 	isHit(point model.Point) bool
 }
 
-func (this figure) draw() {
+func (this figure) Draw() {
 	this.points.ForEach(func(i int, p *model.Point) error {
 		this.writer.Write(p.X, p.Y, p.Symbol)
 		return nil

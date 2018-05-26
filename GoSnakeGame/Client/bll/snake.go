@@ -11,12 +11,12 @@ type snake struct {
 	initialPoints    []model.Point
 }
 
-type isnake interface {
-	ifigure
+type ISnake interface {
+	IFigure
 	Go(direction Direction)
 	Move()
-	TryEat(f ifood)
-	IsHit(f ifigure) bool
+	TryEat(f IFood)
+	IsHit(f IFigure) bool
 	IsHitTail() bool
 	Reset()
 }
@@ -63,7 +63,7 @@ func (this snake) Move() {
 	})
 }
 
-func (this *snake) TryEat(f ifood) {
+func (this *snake) TryEat(f IFood) {
 	if f.isHit(*this.points.First()) {
 		this.points.Add(*this.points.Last())
 		f.Reset()
@@ -92,7 +92,7 @@ func (this *snake) IsHitTail() bool {
 	return isHit
 }
 
-func (this *snake) IsHit(frame ifigure) bool {
+func (this *snake) IsHit(frame IFigure) bool {
 	head := this.points.First()
 	return frame.isHit(*head)
 }

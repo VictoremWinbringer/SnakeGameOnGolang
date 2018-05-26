@@ -6,9 +6,9 @@ import (
 )
 
 type IBllFactory interface {
-	CrateFrame(h, w int, value rune) ifigure
-	CreateFood(x, y int, value rune, maxX, maxY int) ifood
-	CreateSnake(x, y int, value rune) isnake
+	CrateFrame(h, w int, value rune) IFigure
+	CreateFood(x, y int, value rune, maxX, maxY int) IFood
+	CreateSnake(x, y int, value rune) ISnake
 }
 
 type bllFactory struct {
@@ -20,12 +20,12 @@ func NewBllFactory(dalFactory dal.IDalFactory, writer IWriter) IBllFactory {
 	return bllFactory{dalFactory, writer}
 }
 
-func (this bllFactory) CrateFrame(h, w int, value rune) ifigure {
+func (this bllFactory) CrateFrame(h, w int, value rune) IFigure {
 	list := this.dalFactory.CreatePointRepository(createFrame(h, w, value)...)
 	return figure{list, this.writer}
 }
 
-func (this bllFactory) CreateSnake(x, y int, value rune) isnake {
+func (this bllFactory) CreateSnake(x, y int, value rune) ISnake {
 	points := make([]model.Point, 0)
 	for i := 0; i < initialLenth; i++ {
 		points = append(points, model.Point{x - i, y, value})
@@ -35,7 +35,7 @@ func (this bllFactory) CreateSnake(x, y int, value rune) isnake {
 	return &snake{figure{this.dalFactory.CreatePointRepository(points...), this.writer}, RightDirection, RightDirection, initialPoints}
 }
 
-func (this bllFactory) CreateFood(x, y int, value rune, maxX, maxY int) ifood {
+func (this bllFactory) CreateFood(x, y int, value rune, maxX, maxY int) IFood {
 	points := make([]model.Point, 0)
 	points = append(points, model.Point{x, y, value})
 	return food{figure{this.dalFactory.CreatePointRepository(points...), this.writer}, maxX, maxY}

@@ -10,8 +10,8 @@ type food struct {
 	maxY int
 }
 
-type ifood interface {
-	ifigure
+type IFood interface {
+	IFigure
 	Reset()
 }
 

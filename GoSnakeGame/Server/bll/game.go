@@ -15,6 +15,7 @@ const Exit Command = 5
 type IGame interface {
 	Draw()
 	Logic(timeDeltaInNanoSeconds int64) bool
+	Close()
 }
 
 type game struct {
@@ -26,11 +27,17 @@ type game struct {
 	commandChannel chan Command
 }
 
-func NewGame(height int, width int, factory IBllFactory, screen dal.IScreen) IGame {
-	frame := factory.CrateFrame(height, width, '+')
-	food := factory.CreateFood(width/2, height/2, '$', width, height)
-	snake := factory.CreateSnake(width/3, height/3, '+')
-	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}
+func NewGame(height int, width int) (IGame, error) {
+	dalFactory := dal.CreateDalFactory()
+	screen, err := dalFactory.CreateScreen()
+	if err != nil {
+		return nil, err
+	}
+	bllFactory := NewBllFactory(dalFactory, screen)
+	frame := bllFactory.CrateFrame(height, width, '+')
+	food := bllFactory.CreateFood(width/2, height/2, '$', width, height)
+	snake := bllFactory.CreateSnake(width/3, height/3, '+')
+	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}, nil
 }
 
 func keyboardInput(screen dal.IScreen) chan Command {
@@ -96,4 +103,8 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 		game.timeBuffer -= timeDeltaInNanoSecondsAfterThatSnakeMoves
 	}
 	return true
+}
+
+func (this *game) Close() {
+	this.screen.Close()
 }

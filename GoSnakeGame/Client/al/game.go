@@ -1,6 +1,7 @@
-package bll
+package al
 
 import (
+	"../bll"
 	"../dal"
 )
 
@@ -15,22 +16,29 @@ const Exit Command = 5
 type IGame interface {
 	Draw()
 	Logic(timeDeltaInNanoSeconds int64) bool
+	Close()
 }
 
 type game struct {
-	frame          ifigure
-	food           ifood
-	snake          isnake
+	frame          bll.IFigure
+	food           bll.IFood
+	snake          bll.ISnake
 	screen         dal.IScreen
 	timeBuffer     int64
 	commandChannel chan Command
 }
 
-func NewGame(height int, width int, factory IBllFactory, screen dal.IScreen) IGame {
-	frame := factory.CrateFrame(height, width, '+')
-	food := factory.CreateFood(width/2, height/2, '$', width, height)
-	snake := factory.CreateSnake(width/3, height/3, '+')
-	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}
+func NewGame(height int, width int) (IGame, error) {
+	dalFactory := dal.CreateDalFactory()
+	screen, err := dalFactory.CreateScreen()
+	if err != nil {
+		return nil, err
+	}
+	bllFactory := bll.NewBllFactory(dalFactory, screen)
+	frame := bllFactory.CrateFrame(height, width, '+')
+	food := bllFactory.CreateFood(width/2, height/2, '$', width, height)
+	snake := bllFactory.CreateSnake(width/3, height/3, '*')
+	return &game{frame, food, snake, screen, 0, keyboardInput(screen)}, nil
 }
 
 func keyboardInput(screen dal.IScreen) chan Command {
@@ -56,11 +64,10 @@ func keyboardInput(screen dal.IScreen) chan Command {
 }
 
 func (game *game) Draw() {
-
 	game.screen.Clear()
-	game.frame.draw()
-	game.food.draw()
-	game.snake.draw()
+	game.frame.Draw()
+	game.food.Draw()
+	game.snake.Draw()
 	game.screen.Show()
 }
 
@@ -72,13 +79,13 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 	case command := <-game.commandChannel:
 		switch command {
 		case Up:
-			game.snake.Go(UpDirection)
+			game.snake.Go(bll.UpDirection)
 		case Down:
-			game.snake.Go(DownDirection)
+			game.snake.Go(bll.DownDirection)
 		case Left:
-			game.snake.Go(LeftDirection)
+			game.snake.Go(bll.LeftDirection)
 		case Right:
-			game.snake.Go(RightDirection)
+			game.snake.Go(bll.RightDirection)
 		case Exit:
 			game.screen.Clear()
 			game.screen.ShowCursor(0, 0)
@@ -96,4 +103,8 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 		game.timeBuffer -= timeDeltaInNanoSecondsAfterThatSnakeMoves
 	}
 	return true
+}
+
+func (this *game) Close() {
+	this.screen.Close()
 }

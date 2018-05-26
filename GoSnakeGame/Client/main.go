@@ -4,8 +4,7 @@ import (
 	"log"
 	"time"
 
-	"./bll"
-	"./dal"
+	"./al"
 )
 
 func main() {
@@ -29,16 +28,13 @@ func main() {
 	// 	return
 	// }
 	// fmt.Println(ser.DecodeGameState(buffer))
-	dalFactory := dal.CreateDalFactory()
-	screen, err := dalFactory.CreateScreen()
+	game, err := al.NewGame(20, 40)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer func() {
-		screen.Close()
+		game.Close()
 	}()
-	bllFactory := bll.NewBllFactory(dalFactory, screen)
-	game := bll.NewGame(20, 40, bllFactory, screen)
 	timeCurrent := time.Now()
 	c := make(chan int)
 	go func() {
@@ -59,6 +55,5 @@ func main() {
 			game.Draw()
 			time.Sleep(time.Millisecond * 18)
 		}
-
 	}
 }
