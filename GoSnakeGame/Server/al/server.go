@@ -6,20 +6,20 @@ import (
 	udpModule "../../Shared/udp"
 )
 
-type Server interface {
+type IServer interface {
 	Start() error
 }
 
-type Handler interface {
+type IHandler interface {
 	Hanle(requestData []byte, clientId int) []byte
 }
 type server struct {
 	udpServer udpModule.IUdpListener
-	handler   Handler
+	handler   IHandler
 	clients   map[udpModule.Connection]int
 }
 
-func NewServer(port int, ip string, handler Handler) (Server, error) {
+func NewServer(port int, ip string, handler IHandler) (IServer, error) {
 	if handler == nil {
 		return nil, fmt.Errorf("handler is nil!")
 	}
@@ -36,7 +36,7 @@ func (s server) Start() error {
 	return nil
 }
 
-func liscen(ser udpModule.IUdpListener, h Handler, clients map[udpModule.Connection]int) {
+func liscen(ser udpModule.IUdpListener, h IHandler, clients map[udpModule.Connection]int) {
 	defer func() {
 		ser.Close()
 	}()
@@ -57,7 +57,7 @@ func liscen(ser udpModule.IUdpListener, h Handler, clients map[udpModule.Connect
 	}
 }
 
-func sendResponse(ser udpModule.IUdpListener, p []byte, h Handler, addr udpModule.Connection, id int) {
+func sendResponse(ser udpModule.IUdpListener, p []byte, h IHandler, addr udpModule.Connection, id int) {
 	_, err := ser.Write(h.Hanle(p, id), addr)
 	if err != nil {
 		fmt.Printf("Couldn't send response %v", err)

@@ -2,12 +2,12 @@ package dal
 
 import (
 	"../model"
-	tc "github.com/gdamore/tcell"
 )
 
 type IDalFactory interface {
 	CreatePointRepository(points ...model.Point) IPointRepository
-	CreateScreen() (IScreen, error)
+	//CreateScreen() (IScreen, error)
+	CreateWriter(width, height int) IWriter
 }
 
 type dalFactory struct {
@@ -25,15 +25,19 @@ func (this dalFactory) CreatePointRepository(points ...model.Point) IPointReposi
 	return &repository
 }
 
-func (this dalFactory) CreateScreen() (IScreen, error) {
-	s, e := tc.NewScreen()
-	if e != nil {
-		return nil, e
-	}
-	if e := s.Init(); e != nil {
-		return nil, e
-	}
-	s.SetStyle(tc.StyleDefault)
-	s.HideCursor()
-	return screen{s}, nil
+// func (this dalFactory) CreateScreen() (IScreen, error) {
+// 	s, e := tc.NewScreen()
+// 	if e != nil {
+// 		return nil, e
+// 	}
+// 	if e := s.Init(); e != nil {
+// 		return nil, e
+// 	}
+// 	s.SetStyle(tc.StyleDefault)
+// 	s.HideCursor()
+// 	return screen{s}, nil
+// }
+
+func (this dalFactory) CreateWriter(width, height int) IWriter {
+	return &writer{make([]rune, width*height), height, width}
 }
