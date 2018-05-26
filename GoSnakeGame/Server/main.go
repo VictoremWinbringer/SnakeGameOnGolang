@@ -11,25 +11,29 @@ import (
 )
 
 func main() {
-	// screen, _ := CreateScreen()
-	// screen.HideCursor()
-	// defer func() {
-	// 	screen.Fini()
-	// }()
+	screen, _ := CreateScreen()
+	screen.HideCursor()
+	defer func() {
+		screen.Fini()
+	}()
 	game, _ := al.NewGame(20, 40, make(<-chan al.Command))
 	old := time.Now().UnixNano()
 	for {
 		new := time.Now().UnixNano()
 		if !game.Logic(new - old) {
-			//	screen.ShowCursor(0, 0)
+			screen.ShowCursor(0, 0)
 			return
 		}
-
+		old = new
+		screen.Clear()
 		result := game.Draw()
-		println(result)
-		return
-		// screen.Show()
-		// screen.Clear()
+
+		for i, a := range result {
+			for j, r := range a {
+				Write(i, j, r, screen)
+			}
+		}
+		screen.Show()
 	}
 	// handlers := make(map[byte]func([]byte, int) []byte, 1)
 	// handlers[ser.GameStateType] = handleGameData
@@ -46,6 +50,10 @@ func main() {
 	// }
 	// fmt.Println("Started server")
 	// fmt.Scanln()
+}
+
+func Write(x, y int, value rune, screen tc.Screen) {
+	screen.SetContent(x, y, value, nil, tc.StyleDefault)
 }
 
 type MyHandler struct {

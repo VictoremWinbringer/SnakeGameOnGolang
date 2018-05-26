@@ -1,38 +1,39 @@
 package dal
 
-import (
-	"fmt"
-)
-
 type IWriter interface {
 	Write(x, y int, value rune)
-	String() string
+	Data() [][]rune
 	Clear()
 }
 
 type writer struct {
-	data   []rune
+	data   [][]rune
 	height int
 	width  int
 }
 
 func (this *writer) Write(x, y int, value rune) {
-	index := this.width*y + x
-	this.data[index] = value
+	this.data[x][y] = value
 }
 
-func (this *writer) String() string {
-	result := ""
-	begin := 0
-	end := 0
-	for i := 1; i < this.height; i++ {
-		end = this.width * i
-		result += fmt.Sprintln(this.data[begin:end])
-		begin = end
+func (this *writer) Data() [][]rune {
+	matrix := this.createMatrix()
+	for i, a := range this.data {
+		for j, r := range a {
+			matrix[i][j] = r
+		}
 	}
-	return string(this.data)
+	return matrix
 }
 
 func (this *writer) Clear() {
-	this.data = make([]rune, this.width*this.height)
+	this.data = this.createMatrix()
+}
+
+func (this *writer) createMatrix() [][]rune {
+	matrix := make([][]rune, this.width)
+	for i := 0; i < this.width; i++ {
+		matrix[i] = make([]rune, this.height)
+	}
+	return matrix
 }

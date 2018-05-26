@@ -39,5 +39,9 @@ func (this dalFactory) CreatePointRepository(points ...model.Point) IPointReposi
 // }
 
 func (this dalFactory) CreateWriter(width, height int) IWriter {
-	return &writer{make([]rune, width*height), height, width}
+	matrix := make([][]rune, width)
+	for i := 0; i < width; i++ {
+		matrix[i] = make([]rune, height)
+	}
+	return &writer{matrix, height, width}
 }

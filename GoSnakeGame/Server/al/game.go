@@ -14,7 +14,7 @@ const Down Command = 4
 const Exit Command = 5
 
 type IGame interface {
-	Draw() string
+	Draw() [][]rune
 	Logic(timeDeltaInNanoSeconds int64) bool
 }
 
@@ -37,12 +37,12 @@ func NewGame(height int, width int, commands <-chan Command) (IGame, error) {
 	return &game{frame, food, snake, screen, 0, commands}, nil
 }
 
-func (game *game) Draw() string {
+func (game *game) Draw() [][]rune {
 	game.screen.Clear()
 	game.frame.Draw()
 	game.food.Draw()
 	game.snake.Draw()
-	return game.screen.String()
+	return game.screen.Data()
 }
 
 const timeDeltaInNanoSecondsAfterThatSnakeMoves int64 = 200000000
