@@ -1,9 +1,9 @@
-package test
+package tests
 
 import (
 	"testing"
 
-	dal "../src/Server/serverModule/dal"
+	dal "../../src/Server/serverModule/dal"
 )
 
 func TestMul(t *testing.T) {
