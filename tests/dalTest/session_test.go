@@ -6,21 +6,49 @@ import (
 	dal "../../src/Server/serverModule/dal"
 )
 
-func TestMul(t *testing.T) {
-	type args struct {
-		x int
-		y int
+func Test_session_HandleCommand(t *testing.T) {
+	got := 0
+	want := 1
+	session := dal.NewServerDalFactory().CreateSession(func(x int) {
+		got = x
+	}, nil)
+	t.Run("test_session_HandleCommand", func(t *testing.T) {
+		session.HandleCommand(1)
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+}
+
+func Test_session_GetState(t *testing.T) {
+
+	want := make([][]rune, 1)
+	want[0] = make([]rune, 1)
+	want[0][0] = 1
+	session := dal.NewServerDalFactory().CreateSession(nil, func() [][]rune {
+		return want
+	})
+	t.Run("test_session_HandleCommand", func(t *testing.T) {
+		got := session.GetState()
+		if !isEqual(got, want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+}
+
+func isEqual(x, y [][]rune) bool {
+	if len(x) != len(y) {
+		return false
 	}
-	tests := []struct {
-		name string
-		args args
-		want int
-	}{{"ad", args{2, 3}, 6}}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := dal.Mul(tt.args.x, tt.args.y); got != tt.want {
-				t.Errorf("Mul() = %v, want %v", got, tt.want)
+	for i, a := range x {
+		if len(a) != len(y[i]) {
+			return false
+		}
+		for j, _ := range a {
+			if x[i][j] != y[i][j] {
+				return false
 			}
-		})
+		}
 	}
+	return true
 }

@@ -15,7 +15,7 @@ func (this *session) HandleCommand(command int) {
 }
 
 func (this session) GetState() [][]rune {
-
+	return this.stateFunc()
 }
 
 func Mul(x, y int) int {
