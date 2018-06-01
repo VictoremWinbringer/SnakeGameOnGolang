@@ -6,5 +6,5 @@ type HandlerType byte
 
 type IHandler interface {
 	Type() HandlerType
-	Handle(requestId int64, data []byte, session dal.ISession) []byte
+	Handle(data []byte, session dal.ISession) ([]byte, bool)
 }

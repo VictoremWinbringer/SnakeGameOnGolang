@@ -56,7 +56,11 @@ func (this server) listen() {
 }
 
 func (this server) sendResponse(data []byte, address udpModule.Connection, clientId int) {
-	_, err := this.listener.Write(this.dispatcher.Dispatch(data, clientId), address)
+	data, ok = this.dispatcher.Dispatch(data, clientId)
+	if !ok {
+		return
+	}
+	_, err := this.listener.Write(data, address)
 	if err != nil {
 		fmt.Printf("Couldn't send response %v", err)
 	}
