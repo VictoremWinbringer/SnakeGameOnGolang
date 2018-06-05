@@ -24,7 +24,11 @@ func (this *dispatcher) Dispatch(requestData []byte, clientId int) ([]byte, bool
 	if !this.checkAndAddIdTreadSafe(message.Id) {
 		return nil, false
 	}
-	return this.handlers[message.Type].Handle(message.Data, this.sessions[clientId])
+	handrler, ok := this.handlers[message.Type]
+	if !ok {
+		return nil, false
+	}
+	return handrler.Handle(message.Data, this.sessions[clientId])
 }
 
 func (this *dispatcher) checkAndAddIdTreadSafe(id int64) bool {
