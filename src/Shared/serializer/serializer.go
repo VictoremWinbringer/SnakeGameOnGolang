@@ -31,7 +31,7 @@ type CommandCode byte
 
 const (
 	UndefinedCommand CommandCode = 0
-	GetGameData      CommandCode = 1
+	MoveUp           CommandCode = 1
 )
 
 type Command struct {
