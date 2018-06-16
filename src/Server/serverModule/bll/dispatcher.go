@@ -1,34 +1,33 @@
 package bll
 
 import (
+	"fmt"
 	"sync"
 
 	serializer "../../../Shared/serializer"
-	"../dal"
 )
 
 type IDispatcher interface {
-	Dispatch(requestData []byte, clientId int) ([]byte, bool)
+	Dispatch(requestData []byte, clientId int) (IHandler, error)
 }
 
 type dispatcher struct {
 	lastId   int64
 	ids      map[int64]bool
 	mxt      sync.Mutex
-	sessions map[int]dal.ISession
 	handlers map[serializer.MessageType]IHandler
 }
 
-func (this *dispatcher) Dispatch(requestData []byte, clientId int) ([]byte, bool) {
+func (this *dispatcher) Dispatch(requestData []byte, clientId int) (IHandler, error) {
 	message := serializer.DecodeMessage(requestData)
 	if !this.checkAndAddIdTreadSafe(message.Id) {
-		return nil, false
+		return nil, fmt.Errorf("Message with id: %v not valid", message.Id)
 	}
 	handrler, ok := this.handlers[message.Type]
 	if !ok {
-		return nil, false
+		return nil, fmt.Errorf("Handler for type %v not found", message.Type)
 	}
-	return handrler.Handle(message.Data, this.sessions[clientId])
+	return handrler, nil
 }
 
 func (this *dispatcher) checkAndAddIdTreadSafe(id int64) bool {

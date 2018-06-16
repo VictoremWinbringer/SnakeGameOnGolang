@@ -7,6 +7,7 @@ func NewSeverBllFactory() ISeverBllFactory {
 type ISeverBllFactory interface {
 	CreateGameStateHandler() IHandler
 	CreateCommandHandler() IHandler
+	CreateDispatcher() IDispatcher
 }
 
 type factory struct {
@@ -18,4 +19,8 @@ func (this factory) CreateGameStateHandler() IHandler {
 
 func (this factory) CreateCommandHandler() IHandler {
 	return commandHandler{}
+}
+
+func (this factory) CreateDispatcher() IDispatcher {
+	return &dispatcher{}
 }
