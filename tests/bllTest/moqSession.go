@@ -20,6 +20,7 @@ func Equals(x, y serializer.GameState) bool {
 }
 
 type moqSession struct {
+	CommandFunc func(int)
 }
 
 func (this moqSession) GetState() [][]rune {
@@ -27,7 +28,7 @@ func (this moqSession) GetState() [][]rune {
 }
 
 func (this moqSession) HandleCommand(command int) {
-	//Do nothing
+	this.CommandFunc(command)
 }
 
 func makeMatrix() [][]rune {

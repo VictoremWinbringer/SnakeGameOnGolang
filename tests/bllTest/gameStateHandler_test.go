@@ -25,7 +25,7 @@ func Test_gameStateHandler_Handle(t *testing.T) {
 	want := serializer.GameState{makeMatrix()}
 	handler := bll.NewSeverBllFactory().CreateGameStateHandler()
 	t.Run("test_session_HandleCommand", func(t *testing.T) {
-		gotBytes, ok := handler.Handle(make([]byte, 0), moqSession{})
+		gotBytes, ok := handler.Handle(make([]byte, 0), moqSession{nil})
 		if !ok {
 			t.Error("Not Ok!")
 		}
