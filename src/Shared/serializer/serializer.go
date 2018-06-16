@@ -27,6 +27,7 @@ type PartialContent struct {
 type GameState struct {
 	State [][]rune
 }
+
 type CommandCode byte
 
 const (
