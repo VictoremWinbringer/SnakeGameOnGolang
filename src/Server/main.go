@@ -5,8 +5,8 @@ import (
 	"time"
 
 	ser "../Shared/serializer"
-	"./al"
-	"./dal"
+	"./gameModule/al"
+	"./gameModule/dal"
 	tc "github.com/gdamore/tcell"
 )
 
@@ -63,7 +63,7 @@ type MyHandler struct {
 func handleGameData(requestData []byte, clientId int) []byte {
 	input := ser.DecodeGameState(requestData)
 	fmt.Printf("from client %v \n", input)
-	output := ser.GameState{input.State + " From server!"}
+	output := ser.GameState{input.State}
 	return ser.EncodeGameState(output)
 }
 

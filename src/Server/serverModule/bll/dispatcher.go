@@ -3,7 +3,6 @@ package bll
 import (
 	"fmt"
 	"sync"
-
 	serializer "../../../Shared/serializer"
 )
 
@@ -12,8 +11,8 @@ type IDispatcher interface {
 }
 
 type dispatcher struct {
-	lastId   int64
-	ids      map[int64]bool
+	lastId   uint64
+	ids      map[uint64]bool
 	mxt      sync.Mutex
 	handlers map[serializer.MessageType]IHandler
 }
@@ -21,16 +20,16 @@ type dispatcher struct {
 func (this *dispatcher) Dispatch(requestData []byte, clientId int) (IHandler, error) {
 	message := serializer.DecodeMessage(requestData)
 	if !this.checkAndAddIdTreadSafe(message.Id) {
-		return nil, fmt.Errorf("Message with id: %v not valid", message.Id)
+		return nil, fmt.Errorf("message with id: %v not valid", message.Id)
 	}
 	handrler, ok := this.handlers[message.Type]
 	if !ok {
-		return nil, fmt.Errorf("Handler for type %v not found", message.Type)
+		return nil, fmt.Errorf("handler for type %v not found", message.Type)
 	}
 	return handrler, nil
 }
 
-func (this *dispatcher) checkAndAddIdTreadSafe(id int64) bool {
+func (this *dispatcher) checkAndAddIdTreadSafe(id uint64) bool {
 	this.mxt.Lock()
 	defer this.mxt.Unlock()
 	this.clearHistory()
@@ -43,7 +42,7 @@ func (this *dispatcher) checkAndAddIdTreadSafe(id int64) bool {
 
 func (this *dispatcher) clearHistory() {
 	if len(this.ids) > 10000 {
-		newHistory := make(map[int64]bool)
+		newHistory := make(map[uint64]bool)
 		for k, v := range this.ids {
 			if this.lastId-k > 100 {
 				newHistory[k] = v
@@ -53,13 +52,13 @@ func (this *dispatcher) clearHistory() {
 	}
 }
 
-func (this *dispatcher) checkId(id int64) bool {
+func (this *dispatcher) checkId(id uint64) bool {
 	if _, ok := this.ids[id]; this.lastId > id || ok {
 		return false
 	}
 	return true
 }
 
-func (this *dispatcher) addId(id int64) {
+func (this *dispatcher) addId(id uint64) {
 	this.ids[id] = true
 }
