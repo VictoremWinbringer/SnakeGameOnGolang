@@ -7,7 +7,7 @@ import (
 )
 
 type IDispatcher interface {
-	Dispatch(requestData []byte, clientId int) (IHandler, error)
+	Dispatch(requestData []byte, clientId int) (IHandler,serializer.Message, error)
 }
 
 type dispatcher struct {
@@ -17,16 +17,16 @@ type dispatcher struct {
 	handlers map[serializer.MessageType]IHandler
 }
 
-func (this *dispatcher) Dispatch(requestData []byte, clientId int) (IHandler, error) {
+func (this *dispatcher) Dispatch(requestData []byte, clientId int) (IHandler, serializer.Message, error) {
 	message := serializer.DecodeMessage(requestData)
 	if !this.checkAndAddIdTreadSafe(message.Id) {
-		return nil, fmt.Errorf("message with id: %v not valid", message.Id)
+		return nil, serializer.Message{}, fmt.Errorf("message with id: %v not valid", message.Id)
 	}
 	handrler, ok := this.handlers[message.Type]
 	if !ok {
-		return nil, fmt.Errorf("handler for type %v not found", message.Type)
+		return nil, serializer.Message{}, fmt.Errorf("handler for type %v not found", message.Type)
 	}
-	return handrler, nil
+	return handrler,message, nil
 }
 
 func (this *dispatcher) checkAndAddIdTreadSafe(id uint64) bool {

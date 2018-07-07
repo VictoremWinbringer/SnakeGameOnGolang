@@ -2,16 +2,25 @@ package main
 
 import (
 	"fmt"
-	"time"
-
 	ser "../Shared/serializer"
 	"./gameModule/al"
 	"./gameModule/dal"
 	tc "github.com/gdamore/tcell"
+	serverAl "./serverModule/al"
+	serverBll "./serverModule/bll"
 )
 
 func main() {
-	screen, _ := CreateScreen()
+	dispatcher := serverBll.NewSeverBllFactory().CreateDispatcher()
+	server, err := serverAl.NewServer(7788,"127.0.0.1",dispatcher)
+	if err != nil  {
+		print(err)
+		fmt.Scanln()
+		return
+	}
+	server.Start()
+
+	/* screen, _ := CreateScreen()
 	screen.HideCursor()
 	defer func() {
 		screen.Fini()
@@ -34,7 +43,7 @@ func main() {
 			}
 		}
 		screen.Show()
-	}
+	} */
 	// handlers := make(map[byte]func([]byte, int) []byte, 1)
 	// handlers[ser.GameStateType] = handleGameData
 	// handlers[ser.CommandType] = handleCommand

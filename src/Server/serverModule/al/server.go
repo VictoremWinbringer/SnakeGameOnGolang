@@ -5,6 +5,7 @@ import (
 
 	udpModule "../../../Shared/udp"
 	"../bll"
+	"../dal"
 )
 
 type IServer interface {
@@ -15,6 +16,7 @@ type server struct {
 	listener   udpModule.IUdpListener
 	dispatcher bll.IDispatcher
 	clients    map[udpModule.Connection]int
+	sessions map[int]dal.ISession
 }
 
 func NewServer(port int, ip string, dispatcher bll.IDispatcher) (IServer, error) {
@@ -25,11 +27,11 @@ func NewServer(port int, ip string, dispatcher bll.IDispatcher) (IServer, error)
 	if err != nil {
 		return nil, err
 	}
-	return server{udpLiscener, dispatcher, make(map[udpModule.Connection]int)}, nil
+	sessions := make(map[int]dal.ISession)
+	return server{udpLiscener, dispatcher, make(map[udpModule.Connection]int), sessions}, nil
 }
 
 func (this server) Start() error {
-
 	go this.listen()
 	return nil
 }
@@ -56,11 +58,22 @@ func (this server) listen() {
 }
 
 func (this server) sendResponse(data []byte, address udpModule.Connection, clientId int) {
-	data, ok = this.dispatcher.Dispatch(data, clientId)
-	if !ok {
+	handler, message, err := this.dispatcher.Dispatch(data, clientId)
+	if err != nil {
+		print(err)
 		return
 	}
-	_, err := this.listener.Write(data, address)
+   session, ok := this.sessions[clientId]
+   if !ok {
+	   session = dal.NewServerDalFactory().CreateSession()
+	   session.Start()
+	   this.sessions[clientId] = session
+   }
+   result, ok := handler.Handle(message.Data,session)
+   if !ok {
+   	return
+   }
+	_, err = this.listener.Write(result, address)
 	if err != nil {
 		fmt.Printf("Couldn't send response %v", err)
 	}
