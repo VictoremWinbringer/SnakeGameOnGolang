@@ -14,3 +14,5 @@
 .glide/
 *.vscode/settings.json
 debug
+*.idea
+
