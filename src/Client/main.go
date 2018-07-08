@@ -1,8 +1,19 @@
 package main
 
-import szr "../Shared/serializer"
+import (
+	szr "../Shared/serializer"
+	"../Shared/udp"
+)
 
 func requesStateFromServer() [][]rune {
+	 client,err  := udp.NewUdpClient("127.0.0.1:7788")
+	if err  != nil {
+		panic(err)
+	}
+	client.Write(szr.EncodeMessage(szr.Message{
+		Id: 1,
+		Type: szr.GameStateType,
+		Data: make([]byte, 0)}))
 	return make([][]rune, 0)
 }
 

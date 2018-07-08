@@ -3,10 +3,12 @@ package dal
 import (
 	"../model"
 	tc "github.com/gdamore/tcell"
+	"../../Shared/udp"
 )
 
 type IDalFactory interface {
 	CreatePointRepository(points ...model.Point) IPointRepository
+	CreateMessagesRepository(client udp.IUdpClient) IMessagesRepository
 	CreateScreen() (IScreen, error)
 }
 
@@ -36,4 +38,8 @@ func (this dalFactory) CreateScreen() (IScreen, error) {
 	s.SetStyle(tc.StyleDefault)
 	s.HideCursor()
 	return screen{s}, nil
+}
+
+func (this dalFactory) CreateMessagesRepository(client udp.IUdpClient) IMessagesRepository {
+	return newIMessageRepository(client)
 }
