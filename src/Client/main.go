@@ -7,11 +7,14 @@ import (
 )
 
 func requesStateFromServer() ([][]rune, error) {
-	messagesRepository.Write(
+ err :=	messagesRepository.Write(
 		szr.Message{
 			Id:   messageCurrentId,
 			Type: szr.GameStateType,
 			Data: make([]byte, 0)})
+ if err != nil {
+ 	return make([][]rune,0), err
+ }
 	messageCurrentId ++
 	for {
 		m, e := messagesRepository.Read()
@@ -21,6 +24,7 @@ func requesStateFromServer() ([][]rune, error) {
 		if m.Id <= currentReceivedMessageId {
 			continue
 		}
+		currentReceivedMessageId = m.Id
 		state := szr.DecodeGameState(m.Data)
 		return state.State, nil
 	}
@@ -93,7 +97,7 @@ func main() {
 			s, e := requesStateFromServer()
 			if e != nil {
 				print(e)
-				return
+				continue
 			}
 			writeStateToBuffer(s)
 		}

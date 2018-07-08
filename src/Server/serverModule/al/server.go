@@ -53,14 +53,14 @@ func (this server) listen() {
 			fmt.Printf("Some error  %v", err)
 			continue
 		}
-		go this.sendResponse(data, remoteaddr, id)
+		 this.sendResponse(data, remoteaddr, id)
 	}
 }
 
 func (this server) sendResponse(data []byte, address udpModule.Connection, clientId int) {
 	handler, message, err := this.dispatcher.Dispatch(data, clientId)
 	if err != nil {
-		print(err)
+		fmt.Printf("Couldn't create handler %v \n", err)
 		return
 	}
    session, ok := this.sessions[clientId]
@@ -71,10 +71,11 @@ func (this server) sendResponse(data []byte, address udpModule.Connection, clien
    }
    result, ok := handler.Handle(message.Data,session)
    if !ok {
+   	print("Can not handle")
    	return
    }
 	_, err = this.listener.Write(result, address)
 	if err != nil {
-		fmt.Printf("Couldn't send response %v", err)
+		fmt.Printf("Couldn't send response %v \n", err)
 	}
 }
