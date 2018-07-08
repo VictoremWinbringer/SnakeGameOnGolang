@@ -1,9 +1,11 @@
 package bll
 
 import (
-	serializer "../../../Shared/serializer"
+	"../../../Shared/serializer"
 	"../dal"
 )
+
+var currentMessageId uint64 = 1
 
 type gameStateHandler struct {
 }
@@ -14,5 +16,11 @@ func (this gameStateHandler) Type() HandlerType {
 
 func (this gameStateHandler) Handle(data []byte, session dal.ISession) ([]byte, bool) {
 	state := session.GetState()
-	return serializer.EncodeGameState(serializer.GameState{state}), true
+	messageData := serializer.EncodeGameState(serializer.GameState{state})
+	message := serializer.Message{
+		currentMessageId,
+		serializer.GameStateType,
+		messageData}
+	currentMessageId++
+	return serializer.EncodeMessage(message), true
 }

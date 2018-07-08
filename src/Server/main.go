@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 	server.Start()
-
+fmt.Scanln()
 	/* screen, _ := CreateScreen()
 	screen.HideCursor()
 	defer func() {
