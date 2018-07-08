@@ -33,6 +33,10 @@ type CommandCode byte
 const (
 	UndefinedCommand CommandCode = 0
 	MoveUp           CommandCode = 1
+	MoveDown	     CommandCode = 2
+	MoveLeft         CommandCode = 3
+	MoveRight        CommandCode = 4
+	ExitGame         CommandCode = 5
 )
 
 type Command struct {
