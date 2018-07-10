@@ -3,11 +3,12 @@ package bll
 import (
 	"fmt"
 	"sync"
+
 	serializer "../../../Shared/serializer"
 )
 
 type IDispatcher interface {
-	Dispatch(requestData []byte, clientId int) (IHandler,serializer.Message, error)
+	Dispatch(requestData []byte, clientId int) (IHandler, serializer.Message, error)
 }
 
 type dispatcher struct {
@@ -26,7 +27,7 @@ func (this *dispatcher) Dispatch(requestData []byte, clientId int) (IHandler, se
 	if !ok {
 		return nil, serializer.Message{}, fmt.Errorf("handler for type %v not found", message.Type)
 	}
-	return handrler,message, nil
+	return handrler, message, nil
 }
 
 func (this *dispatcher) checkAndAddIdTreadSafe(id uint64) bool {
@@ -61,4 +62,5 @@ func (this *dispatcher) checkId(id uint64) bool {
 
 func (this *dispatcher) addId(id uint64) {
 	this.ids[id] = true
+	this.lastId = id
 }

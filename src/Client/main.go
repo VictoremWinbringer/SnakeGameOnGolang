@@ -1,26 +1,34 @@
 package main
 
 import (
+	"fmt"
+
 	szr "../Shared/serializer"
 	"../Shared/udp"
 	"./dal"
 )
 
-func requesStateFromServer() ([][]rune, error) {
- err :=	messagesRepository.Write(
+func sendStateMessage() error {
+	err := messagesRepository.Write(
 		szr.Message{
 			Id:   messageCurrentId,
 			Type: szr.GameStateType,
 			Data: make([]byte, 0)})
- if err != nil {
- 	return make([][]rune,0), err
- }
-	messageCurrentId ++
+	if err != nil {
+		return err
+	}
+	messageCurrentId++
+	return nil
+}
+
+func requestStateFromServer() ([][]rune, error) {
+	//return createTestState(), nil
 	for {
 		m, e := messagesRepository.Read()
 		if e != nil {
 			return make([][]rune, 0), e
 		}
+		fmt.Printf("Recived message %v\n", m)
 		if m.Id <= currentReceivedMessageId {
 			continue
 		}
@@ -28,6 +36,17 @@ func requesStateFromServer() ([][]rune, error) {
 		state := szr.DecodeGameState(m.Data)
 		return state.State, nil
 	}
+}
+
+func createTestState() [][]rune {
+	state := make([][]rune, 0)
+	for i := 0; i < 30; i++ {
+		state = append(state, make([]rune, 30))
+		for j := 0; j < 30; j++ {
+			state[i][j] = '+'
+		}
+	}
+	return state
 }
 
 func writeStateToBuffer(state [][]rune) {
@@ -92,20 +111,25 @@ func main() {
 	messageCurrentId = 1
 	currentReceivedMessageId = 0
 	stateBuffer = make(chan [][]rune, 100)
+
 	go func() {
 		for {
-			s, e := requesStateFromServer()
+			e := sendStateMessage()
 			if e != nil {
-				print(e)
+				println(e.Error())
+			}
+		}
+	}()
+	go func() {
+		for {
+			s, e := requestStateFromServer()
+			if e != nil {
+				print(e.Error())
 				continue
 			}
 			writeStateToBuffer(s)
 		}
 	}()
-
-	for {
-		showState(readStateFromBuffer())
-	}
 
 	go func() {
 		for {
@@ -118,6 +142,11 @@ func main() {
 			sendCommandToServer(creteCommandWithCode(readCommandCodeFromBuffer()))
 		}
 	}()
+
+	for {
+		showState(readStateFromBuffer())
+	}
+
 	// upd, err := u.New("127.0.0.1:8888")
 	// if err != nil {
 	// 	fmt.Printf("Error on start client %v", err)

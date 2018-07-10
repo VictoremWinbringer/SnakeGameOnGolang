@@ -44,16 +44,17 @@ func (this server) listen() {
 	for {
 		data := make([]byte, 4096)
 		_, remoteaddr, err := this.listener.Read(data)
+		if err != nil {
+			fmt.Printf("Error on reading from listener %v\n",err)
+			continue
+		}
+		fmt.Printf("Remoute address %v\n", remoteaddr)
 		id, ok := this.clients[remoteaddr]
 		if !ok {
 			id = currentId + 1
 			this.clients[remoteaddr] = id
 		}
-		if err != nil {
-			fmt.Printf("Some error  %v", err)
-			continue
-		}
-		 this.sendResponse(data, remoteaddr, id)
+		go this.sendResponse(data, remoteaddr, id)
 	}
 }
 
@@ -63,6 +64,7 @@ func (this server) sendResponse(data []byte, address udpModule.Connection, clien
 		fmt.Printf("Couldn't create handler %v \n", err)
 		return
 	}
+	fmt.Printf("Message %v\n", message)
    session, ok := this.sessions[clientId]
    if !ok {
 	   session = dal.NewServerDalFactory().CreateSession()
@@ -74,6 +76,7 @@ func (this server) sendResponse(data []byte, address udpModule.Connection, clien
    	print("Can not handle")
    	return
    }
+fmt.Printf("Result %v\n", result)
 	_, err = this.listener.Write(result, address)
 	if err != nil {
 		fmt.Printf("Couldn't send response %v \n", err)
