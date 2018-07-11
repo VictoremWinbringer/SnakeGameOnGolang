@@ -20,12 +20,12 @@ func (this factory) CreateGameStateHandler() IHandler {
 }
 
 func (this factory) CreateCommandHandler() IHandler {
-	return commandHandler{lastId:0, ids: make(map[uint64]bool,0)}
+	return commandHandler{lastId: 0}
 }
 
 func (this factory) CreateDispatcher() IDispatcher {
 	handlers := make(map[serializer.MessageType]IHandler, 0)
 	handlers[serializer.CommandType] = this.CreateCommandHandler()
 	handlers[serializer.GameStateType] = this.CreateGameStateHandler()
-	return &dispatcher{lastId: 0, ids: make(map[uint64]bool, 0), handlers: handlers}
+	return &dispatcher{lastId: 0, handlers: handlers}
 }

@@ -31,6 +31,14 @@ func (this moqSession) HandleCommand(command int) {
 	this.CommandFunc(command)
 }
 
+func (this moqSession) Start()  {
+
+}
+
+func (this moqSession) Stop()  {
+
+}
+
 func makeMatrix() [][]rune {
 	matrix := make([][]rune, 1)
 	matrix[0] = make([]rune, 1)

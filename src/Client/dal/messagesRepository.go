@@ -2,7 +2,6 @@ package dal
 
 import (
 	"../../Shared/serializer"
-	"encoding/gob"
 	"../../Shared/udp"
 )
 
@@ -14,25 +13,28 @@ type IMessagesRepository interface {
 
 func newIMessageRepository(client udp.IUdpClient) IMessagesRepository {
 	return messagesRepository{
-		encoder:   gob.NewEncoder(client),
-		decoder:   gob.NewDecoder(client),
         udpClient: client}
 }
 
 type messagesRepository struct {
-encoder *gob.Encoder
-decoder *gob.Decoder
 udpClient udp.IUdpClient
 }
 
 func (this messagesRepository) Read() (serializer.Message, error) {
-	message := serializer.Message{}
-	err := this.decoder.Decode(&message)
-	return message, err
+	p := make([]byte, 4096)
+ _ , e :=	this.udpClient.Read(p)
+ m := serializer.DecodeMessage(p)
+ return m, e
+	//message := serializer.Message{}
+	//err := this.decoder.Decode(&message)
+	//return message, err
 }
 
 func (this messagesRepository) Write(message serializer.Message) error {
-return this.encoder.Encode(message)
+	p := serializer.EncodeMessage(message)
+	_, e := this.udpClient.Write(p)
+	return e
+//return this.encoder.Encode(message)
 }
 
 func (this messagesRepository) Dispose()  {

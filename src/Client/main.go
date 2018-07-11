@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"sync"
 
 	szr "../Shared/serializer"
 	"../Shared/udp"
@@ -9,26 +12,28 @@ import (
 )
 
 func sendStateMessage() error {
+	mtx.Lock()
+	defer mtx.Unlock()
 	err := messagesRepository.Write(
 		szr.Message{
 			Id:   messageCurrentId,
 			Type: szr.GameStateType,
 			Data: make([]byte, 0)})
+	messageCurrentId++
 	if err != nil {
 		return err
 	}
-	messageCurrentId++
 	return nil
 }
 
 func requestStateFromServer() ([][]rune, error) {
-	//return createTestState(), nil
+	mtx.Lock()
+	defer mtx.Unlock()
 	for {
 		m, e := messagesRepository.Read()
 		if e != nil {
 			return make([][]rune, 0), e
 		}
-		fmt.Printf("Recived message %v\n", m)
 		if m.Id <= currentReceivedMessageId {
 			continue
 		}
@@ -40,9 +45,9 @@ func requestStateFromServer() ([][]rune, error) {
 
 func createTestState() [][]rune {
 	state := make([][]rune, 0)
-	for i := 0; i < 30; i++ {
-		state = append(state, make([]rune, 30))
-		for j := 0; j < 30; j++ {
+	for i := 0; i < 10; i++ {
+		state = append(state, make([]rune, 10))
+		for j := 0; j < 10; j++ {
 			state[i][j] = '+'
 		}
 	}
@@ -68,24 +73,50 @@ func showState(state [][]rune) {
 }
 
 func readPressedKey() szr.CommandCode {
-
-	return szr.ExitGame
+	key := screen.ReadKey()
+	switch key {
+	case dal.KeyUp:
+		return szr.MoveUp
+	case dal.KeyDown:
+		return szr.MoveDown
+	case dal.KeyLeft:
+		return szr.MoveLeft
+	case dal.KeyRight:
+		return szr.MoveRight
+	case dal.KeyEsc:
+		return szr.ExitGame
+	default:
+		return szr.UndefinedCommand
+	}
 }
 
 func writeCommandCodeToBuffer(code szr.CommandCode) {
-
+	commandBuffer <- code
 }
 
 func readCommandCodeFromBuffer() szr.CommandCode {
-	return szr.ExitGame
+	return <-commandBuffer
 }
 
-func creteCommandWithCode(code szr.CommandCode) szr.Command {
-	return szr.Command{}
+func creteCommandWithCode(code szr.CommandCode, id uint64) szr.Command {
+	return szr.Command{id, code}
 }
 
-func sendCommandToServer(command szr.Command) {
-
+func sendCommandToServer(command szr.Command) error {
+	mtx.Lock()
+	defer mtx.Unlock()
+	logger.Println(command.Code)
+	logger.Println(command.Id)
+	err := messagesRepository.Write(
+		szr.Message{
+			Id:   messageCurrentId,
+			Type: szr.CommandType,
+			Data: szr.EncodeCommand(command)})
+	messageCurrentId++
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 var messagesRepository dal.IMessagesRepository
@@ -93,59 +124,84 @@ var messageCurrentId uint64
 var currentReceivedMessageId uint64
 var stateBuffer chan [][]rune
 var screen dal.IScreen
+var commandBuffer chan szr.CommandCode
+var currentCommandId uint64
+var udpClient udp.IUdpClient
+var mtx sync.Mutex
+var logger *log.Logger
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
+}
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in f", r)
+		}
+	}()
+	currentCommandId = 0
+	commandBuffer = make(chan szr.CommandCode)
 	factory := dal.CreateDalFactory()
-	client, err := udp.NewUdpClient("127.0.0.1:7788")
+	sc, err := factory.CreateScreen()
 	if err != nil {
-		print(err)
+		print(err.Error())
 		return
 	}
-	screen, err = factory.CreateScreen()
-	if err != nil {
-		print(err)
-		return
-	}
+	screen = sc
 	defer screen.Close()
+	client, err := udp.NewUdpClient("127.0.0.1:7788", 5)
+	if err != nil {
+		print(err.Error())
+		return
+	}
 	messagesRepository = factory.CreateMessagesRepository(client)
+	defer messagesRepository.Dispose()
 	messageCurrentId = 1
 	currentReceivedMessageId = 0
 	stateBuffer = make(chan [][]rune, 100)
+	f, err := os.Create("log.txt")
+	check(err)
+	defer f.Close()
+	l := log.New(f, "main ", log.LstdFlags)
+	logger = l
 
 	go func() {
 		for {
-			e := sendStateMessage()
-			if e != nil {
-				println(e.Error())
-			}
-		}
-	}()
-	go func() {
-		for {
-			s, e := requestStateFromServer()
-			if e != nil {
-				print(e.Error())
+			code := readPressedKey()
+			if code < 1 {
 				continue
 			}
-			writeStateToBuffer(s)
+			currentCommandId++
+			id := currentCommandId
+			for i := 0; i < 4; i++ {
+				e := sendCommandToServer(creteCommandWithCode(code, id))
+				if e != nil {
+					l.Println(e.Error())
+				}
+			}
 		}
 	}()
 
-	go func() {
-		for {
-			writeCommandCodeToBuffer(readPressedKey())
-		}
-	}()
-
-	go func() {
-		for {
-			sendCommandToServer(creteCommandWithCode(readCommandCodeFromBuffer()))
-		}
-	}()
-
+	//go func() {
 	for {
-		showState(readStateFromBuffer())
+		e := sendStateMessage()
+		if e != nil {
+			l.Println(e.Error())
+			continue
+		}
+		s, e := requestStateFromServer()
+		if e != nil {
+			l.Println(e.Error())
+			continue
+		}
+		showState(s)
 	}
+	//}()
+
+	//fmt.Scanln()
 
 	// upd, err := u.New("127.0.0.1:8888")
 	// if err != nil {

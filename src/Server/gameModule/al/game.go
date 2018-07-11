@@ -51,6 +51,7 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 	game.timeBuffer += timeDeltaInNanoSeconds
 	select {
 	case command := <-game.commandChannel:
+		print(command)
 		switch command {
 		case Up:
 			game.snake.Go(bll.UpDirection)

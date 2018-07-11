@@ -8,9 +8,6 @@ type serverDalFactory struct {
 }
 
 func (this *serverDalFactory) CreateSession() ISession {
-
-
-
 	return &session{}
 }
 

@@ -9,9 +9,7 @@ import (
 func Test_session_HandleCommand(t *testing.T) {
 	got := 0
 	want := 1
-	session := dal.NewServerDalFactory().CreateSession(func(x int) {
-		got = x
-	}, nil)
+	session := dal.NewServerDalFactory().CreateSession()
 	t.Run("test_session_HandleCommand", func(t *testing.T) {
 		session.HandleCommand(1)
 		if got != want {
@@ -25,9 +23,7 @@ func Test_session_GetState(t *testing.T) {
 	want := make([][]rune, 1)
 	want[0] = make([]rune, 1)
 	want[0][0] = 1
-	session := dal.NewServerDalFactory().CreateSession(nil, func() [][]rune {
-		return want
-	})
+	session := dal.NewServerDalFactory().CreateSession()
 	t.Run("test_session_HandleCommand", func(t *testing.T) {
 		got := session.GetState()
 		if !isEqual(got, want) {

@@ -1,9 +1,9 @@
 package dal
 
-
 import (
-	"../../gameModule/al"
 	"time"
+
+	"../../gameModule/al"
 )
 
 type ISession interface {
@@ -16,10 +16,11 @@ type ISession interface {
 type session struct {
 	game           al.IGame
 	commandChannel chan al.Command
-	done chan bool
+	done           chan bool
 }
 
 func (this *session) HandleCommand(command int) {
+	println(command)
 	this.commandChannel <- al.Command(command)
 }
 
@@ -27,33 +28,29 @@ func (this session) GetState() [][]rune {
 	return this.game.Draw()
 }
 
-func (this *session) Start()  {
-	commandChannel :=  make(chan al.Command)
+func (this *session) Start() {
+	commandChannel := make(chan al.Command)
 	game, _ := al.NewGame(20, 40, commandChannel)
 	this.game = game
 	this.commandChannel = commandChannel
 	this.done = make(chan bool)
-go func() {
-	old := time.Now().UnixNano()
-	for {
-		new := time.Now().UnixNano()
-		select {
-		case <- this.done:
-			return
-		default:
-			if !game.Logic(new - old) {
+	go func() {
+		old := time.Now().UnixNano()
+		for {
+			new := time.Now().UnixNano()
+			select {
+			case <-this.done:
 				return
+			default:
+				if !game.Logic(new - old) {
+					return
+				}
+				old = new
 			}
-			old = new
 		}
-	}
-}()
+	}()
 }
 
-func (this *session) Stop(){
+func (this *session) Stop() {
 	this.done <- true
-}
-
-func Mul(x, y int) int {
-	return x * y
 }

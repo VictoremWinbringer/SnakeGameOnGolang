@@ -16,7 +16,7 @@ type server struct {
 	listener   udpModule.IUdpListener
 	dispatcher bll.IDispatcher
 	clients    map[udpModule.Connection]int
-	sessions map[int]dal.ISession
+	sessions   map[int]dal.ISession
 }
 
 func NewServer(port int, ip string, dispatcher bll.IDispatcher) (IServer, error) {
@@ -43,12 +43,13 @@ func (this server) listen() {
 	var currentId int = 0
 	for {
 		data := make([]byte, 4096)
-		_, remoteaddr, err := this.listener.Read(data)
+		count, remoteaddr, err := this.listener.Read(data)
 		if err != nil {
-			fmt.Printf("Error on reading from listener %v\n",err)
+			fmt.Printf("Error on reading from listener %v\n", err)
 			continue
 		}
-		fmt.Printf("Remoute address %v\n", remoteaddr)
+		println("Count :")
+		println(count)
 		id, ok := this.clients[remoteaddr]
 		if !ok {
 			id = currentId + 1
@@ -59,26 +60,29 @@ func (this server) listen() {
 }
 
 func (this server) sendResponse(data []byte, address udpModule.Connection, clientId int) {
-	handler, message, err := this.dispatcher.Dispatch(data, clientId)
+	handler, message, err := this.dispatcher.Dispatch(data)
 	if err != nil {
 		fmt.Printf("Couldn't create handler %v \n", err)
 		return
 	}
-	fmt.Printf("Message %v\n", message)
-   session, ok := this.sessions[clientId]
-   if !ok {
-	   session = dal.NewServerDalFactory().CreateSession()
-	   session.Start()
-	   this.sessions[clientId] = session
-   }
-   result, ok := handler.Handle(message.Data,session)
-   if !ok {
-   	print("Can not handle")
-   	return
-   }
-fmt.Printf("Result %v\n", result)
-	_, err = this.listener.Write(result, address)
-	if err != nil {
+	if handler.Type() == 2 || handler.Type() == 0 {
+		println("Commandddd ", handler.Type())
+	}
+	session, ok := this.sessions[clientId]
+	if !ok {
+		session = dal.NewServerDalFactory().CreateSession()
+		session.Start()
+		this.sessions[clientId] = session
+	}
+	result, ok := handler.Handle(message.Data, session)
+	if !ok {
+		println("Can not handle")
+		return
+	}
+	count, e := this.listener.Write(result, address)
+	if e != nil {
 		fmt.Printf("Couldn't send response %v \n", err)
 	}
+	println("Send count")
+	println(count)
 }
