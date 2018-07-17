@@ -1,6 +1,10 @@
 package bll
 
-import serializer "../../../Shared/serializer"
+import (
+	"sync"
+
+	serializer "../../../Shared/serializer"
+)
 
 func NewSeverBllFactory() ISeverBllFactory {
 	return factory{}
@@ -20,12 +24,12 @@ func (this factory) CreateGameStateHandler() IHandler {
 }
 
 func (this factory) CreateCommandHandler() IHandler {
-	return commandHandler{lastId: 0}
+	return commandHandler{lastId: 0, mxt: &sync.Mutex{}}
 }
 
 func (this factory) CreateDispatcher() IDispatcher {
 	handlers := make(map[serializer.MessageType]IHandler, 0)
 	handlers[serializer.CommandType] = this.CreateCommandHandler()
 	handlers[serializer.GameStateType] = this.CreateGameStateHandler()
-	return &dispatcher{lastId: 0, handlers: handlers}
+	return &dispatcher{lastId: 0, mxt: &sync.Mutex{}, handlers: handlers}
 }

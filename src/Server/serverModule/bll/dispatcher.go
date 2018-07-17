@@ -13,7 +13,7 @@ type IDispatcher interface {
 
 type dispatcher struct {
 	lastId   uint64
-	mxt      sync.Mutex
+	mxt      *sync.Mutex
 	handlers map[serializer.MessageType]IHandler
 }
 

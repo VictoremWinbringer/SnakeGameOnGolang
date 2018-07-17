@@ -9,7 +9,7 @@ import (
 
 type commandHandler struct {
 	lastId uint64
-	mxt    sync.Mutex
+	mxt    *sync.Mutex
 }
 
 func (this commandHandler) Type() HandlerType {

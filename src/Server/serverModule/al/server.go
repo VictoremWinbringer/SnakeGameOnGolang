@@ -79,6 +79,9 @@ func (this server) sendResponse(data []byte, address udpModule.Connection, clien
 		println("Can not handle")
 		return
 	}
+	if len(result) < 1 {
+		return
+	}
 	count, e := this.listener.Write(result, address)
 	if e != nil {
 		fmt.Printf("Couldn't send response %v \n", err)
