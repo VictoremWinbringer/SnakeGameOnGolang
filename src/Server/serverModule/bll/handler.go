@@ -2,11 +2,12 @@ package bll
 
 import (
 	"../dal"
+	. "../../../Shared/serializer"
 )
 
 type HandlerType byte
 
 type IHandler interface {
 	Type() HandlerType
-	Handle(data []byte, session dal.ISession) ([]byte, bool)
+	Handle(data Message, session dal.ISession) ([]byte, error)
 }

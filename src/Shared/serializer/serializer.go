@@ -12,7 +12,6 @@ const GameStateType MessageType = 1
 const CommandType MessageType = 2
 
 type Message struct {
-	Id   uint64
 	Type MessageType
 	Data []byte
 }
@@ -40,7 +39,7 @@ const (
 )
 
 type Command struct {
-	Id   uint64
+	Id uint64
 	Code CommandCode
 }
 

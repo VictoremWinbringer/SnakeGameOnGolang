@@ -1,38 +1,40 @@
 package bll
 
 import (
-	"sync"
+	"fmt"
 
 	serializer "../../../Shared/serializer"
 	"../dal"
 )
 
 type commandHandler struct {
-	lastId uint64
-	mxt    *sync.Mutex
+	lastId     uint64
+	inCount    float32
+	validCount float32
 }
 
-func (this commandHandler) Type() HandlerType {
+func (this *commandHandler) Type() HandlerType {
 	return HandlerType(serializer.CommandType)
 }
 
-func (this commandHandler) Handle(data []byte, session dal.ISession) ([]byte, bool) {
-	println("CommandHandler")
-	command := serializer.DecodeCommand(data)
-	println("Command code")
-	println(command.Code)
-	if !this.checkAndAddIdTreadSafe(command.Id) {
-		return make([]byte, 0), false
+func (this *commandHandler) Handle(data serializer.Message, session dal.ISession) ([]byte, error) {
+	command := serializer.DecodeCommand(data.Data)
+	if !this.checkAndChangeId(command.Id) {
+		return make([]byte, 0), nil
 	}
 	session.HandleCommand(int(command.Code))
-	return make([]byte, 0), true
+	return make([]byte, 0), nil
 }
 
-func (this *commandHandler) checkAndAddIdTreadSafe(id uint64) bool {
-	this.mxt.Lock()
-	defer this.mxt.Unlock()
+func (this *commandHandler) checkAndChangeId(id uint64) bool {
+	this.inCount++
+	if this.inCount > 100 {
+		fmt.Printf("Packet loss = %v%%\n", ((this.inCount/this.validCount)/4)*100)
+		this.inCount -= 100
+	}
 	if this.lastId < id {
 		this.lastId = id
+		this.validCount++
 		return true
 	}
 	return false

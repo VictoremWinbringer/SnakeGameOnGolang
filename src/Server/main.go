@@ -5,6 +5,7 @@ import (
 
 	serverAl "./serverModule/al"
 	serverBll "./serverModule/bll"
+	serverDal "./serverModule/dal"
 )
 
 func main() {
@@ -13,13 +14,29 @@ func main() {
 			fmt.Println("Recovered in f", r)
 		}
 	}()
-	dispatcher := serverBll.NewSeverBllFactory().CreateDispatcher()
-	server, err := serverAl.NewServer(7788, "127.0.0.1", dispatcher)
+	ip := ""
+	port := 0
+	println("Inter ip to liscen")
+	_, e := fmt.Scanln(&ip)
+	if e != nil {
+		println(e.Error())
+		fmt.Scanln()
+		return
+	}
+	println("Inter port to liscen")
+	_, e = fmt.Scanln(&port)
+	if e != nil {
+		println(e.Error())
+		fmt.Scanln()
+		return
+	}
+	server, err := serverAl.NewServer(port, ip, serverBll.NewSeverBllFactory(serverDal.NewServerDalFactory()))
 	if err != nil {
 		println(err.Error())
 		fmt.Scanln()
 		return
 	}
 	server.Start()
+	println("Press Enter to exit")
 	fmt.Scanln()
 }

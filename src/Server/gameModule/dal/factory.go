@@ -25,19 +25,6 @@ func (this dalFactory) CreatePointRepository(points ...model.Point) IPointReposi
 	return &repository
 }
 
-// func (this dalFactory) CreateScreen() (IScreen, error) {
-// 	s, e := tc.NewScreen()
-// 	if e != nil {
-// 		return nil, e
-// 	}
-// 	if e := s.Init(); e != nil {
-// 		return nil, e
-// 	}
-// 	s.SetStyle(tc.StyleDefault)
-// 	s.HideCursor()
-// 	return screen{s}, nil
-// }
-
 func (this dalFactory) CreateWriter(width, height int) IWriter {
 	matrix := make([][]rune, width)
 	for i := 0; i < width; i++ {

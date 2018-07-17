@@ -20,7 +20,6 @@ type session struct {
 }
 
 func (this *session) HandleCommand(command int) {
-	println(command)
 	this.commandChannel <- al.Command(command)
 }
 

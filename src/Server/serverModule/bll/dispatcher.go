@@ -2,39 +2,52 @@ package bll
 
 import (
 	"fmt"
-	"sync"
 
-	serializer "../../../Shared/serializer"
+	"../../../Shared/udp"
 )
 
 type IDispatcher interface {
-	Dispatch(requestData []byte) (IHandler, serializer.Message, error)
+	Dispatch(data []byte, connection udp.Connection)
+	Close()
 }
 
 type dispatcher struct {
-	lastId   uint64
-	mxt      *sync.Mutex
-	handlers map[serializer.MessageType]IHandler
+	onSuccess func([]byte, udp.Connection)
+	onError   func(error)
+	clients   map[string]IClient
+	factory   ISeverBllFactory
 }
 
-func (this *dispatcher) Dispatch(requestData []byte) (IHandler, serializer.Message, error) {
-	message := serializer.DecodeMessage(requestData)
-	if !this.checkAndAddIdTreadSafe(message.Id) {
-		return nil, message, fmt.Errorf("message with id: %v not valid", message.Id)
-	}
-	handrler, ok := this.handlers[message.Type]
+func (this *dispatcher) Dispatch(data []byte, connection udp.Connection) {
+	this.checkAliveClients()
+	ip := fmt.Sprintf("%v", connection)
+	c, ok := this.clients[ip]
 	if !ok {
-		return nil, message, fmt.Errorf("handler for type %v not found", message.Type)
+		fmt.Printf("Connected new client %s\n", ip)
+		this.clients[ip] = this.factory.CreateClient()
+		c = this.clients[ip]
 	}
-	return handrler, message, nil
+	c.UpdateLastActiveTime()
+	b, e := c.Accept(data)
+	if e != nil {
+		this.onError(e)
+		return
+	}
+	this.onSuccess(b, connection)
 }
 
-func (this *dispatcher) checkAndAddIdTreadSafe(id uint64) bool {
-	this.mxt.Lock()
-	defer this.mxt.Unlock()
-	if this.lastId < id {
-		this.lastId = id
-		return true
+func (this *dispatcher) Close() {
+	for _, v := range this.clients {
+		v.Close()
 	}
-	return false
+}
+
+func (this *dispatcher) checkAliveClients() {
+	for k, v := range this.clients {
+		if !v.IsAlive() {
+			this.clients[k].Close()
+			delete(this.clients, k)
+			fmt.Printf("Client with ip : %v disconnected!\n", k)
+		}
+	}
 }

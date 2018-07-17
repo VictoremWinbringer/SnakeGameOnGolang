@@ -1,2 +1,2 @@
 # SnakeGameOnGolang
-Go, UDP, TCP, Http, Client - Server Game. I am learning Go.
+Go, UDP, Client - Server Game. I am learning Go.

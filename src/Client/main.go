@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	szr "../Shared/serializer"
 	"../Shared/udp"
 	"./dal"
 )
 
-func sendStateMessage(id uint64) error {
+func sendStateMessage() error {
 	err := messagesRepository.Write(
 		szr.Message{
-			Id:   id,
 			Type: szr.GameStateType,
 			Data: make([]byte, 0)})
 	if err != nil {
@@ -22,38 +22,15 @@ func sendStateMessage(id uint64) error {
 	return nil
 }
 
-func requestStateFromServer(currentReceivedMessageId uint64) ([][]rune, error, uint64) {
+func requestStateFromServer() ([][]rune, error) {
 	for {
 		m, e := messagesRepository.Read()
 		if e != nil {
-			return make([][]rune, 0), e, 0
+			return make([][]rune, 0), e
 		}
-		if m.Id <= currentReceivedMessageId {
-			continue
-		}
-		currentReceivedMessageId = m.Id
 		state := szr.DecodeGameState(m.Data)
-		return state.State, nil, currentReceivedMessageId
+		return state.State, nil
 	}
-}
-
-func createTestState() [][]rune {
-	state := make([][]rune, 0)
-	for i := 0; i < 10; i++ {
-		state = append(state, make([]rune, 10))
-		for j := 0; j < 10; j++ {
-			state[i][j] = '+'
-		}
-	}
-	return state
-}
-
-func writeStateToBuffer(state [][]rune) {
-	stateBuffer <- state
-}
-
-func readStateFromBuffer() [][]rune {
-	return <-stateBuffer
 }
 
 func showState(state [][]rune) {
@@ -66,26 +43,16 @@ func showState(state [][]rune) {
 	screen.Show()
 }
 
-func readPressedKey() chan szr.CommandCode {
-	out := make(chan szr.CommandCode)
-	go func() {
-		key := screen.ReadKey()
-		command := parseKeyCode(key)
-		out <- command
-	}()
-	return out
-}
-
 func parseKeyCode(key dal.Key) szr.CommandCode {
 	switch key {
 	case dal.KeyUp:
-		return szr.MoveUp
-	case dal.KeyDown:
-		return szr.MoveDown
-	case dal.KeyLeft:
 		return szr.MoveLeft
-	case dal.KeyRight:
+	case dal.KeyDown:
 		return szr.MoveRight
+	case dal.KeyLeft:
+		return szr.MoveUp
+	case dal.KeyRight:
+		return szr.MoveDown
 	case dal.KeyEsc:
 		return szr.ExitGame
 	default:
@@ -93,10 +60,10 @@ func parseKeyCode(key dal.Key) szr.CommandCode {
 	}
 }
 
-func sendCommandToServer(command szr.Command, id uint64) error {
+func sendCommandToServer(command szr.Command) error {
 	err := messagesRepository.Write(
 		szr.Message{
-			Id:   id,
+			//	Id:   id,
 			Type: szr.CommandType,
 			Data: szr.EncodeCommand(command)})
 	if err != nil {
@@ -106,16 +73,9 @@ func sendCommandToServer(command szr.Command, id uint64) error {
 }
 
 var messagesRepository dal.IMessagesRepository
-var stateBuffer chan [][]rune
 var screen dal.IScreen
 var udpClient udp.IUdpClient
 var logger *log.Logger
-
-func check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
 
 func main() {
 	defer func() {
@@ -123,57 +83,85 @@ func main() {
 			fmt.Println("Recovered in f", r)
 		}
 	}()
+	ip := ""
+	println("Inter ip:port to liscen")
+	_, e := fmt.Scanln(&ip)
+	if e != nil {
+		println(e.Error())
+		fmt.Scanln()
+		return
+	}
+
+	ipServer := ""
+	println("Inter ip:port of server")
+	_, e = fmt.Scanln(&ipServer)
+	if e != nil {
+		println(e.Error())
+		fmt.Scanln()
+		return
+	}
+
 	factory := dal.CreateDalFactory()
 	sc, err := factory.CreateScreen()
 	if err != nil {
 		print(err.Error())
+		fmt.Scanln()
 		return
 	}
 	screen = sc
 	defer screen.Close()
-	client, err := udp.NewUdpClient("127.0.0.1:7788", 5)
+	client, err := udp.NewUdpClient(ip, ipServer, 5)
 	if err != nil {
 		print(err.Error())
+		fmt.Scanln()
 		return
 	}
 	messagesRepository = factory.CreateMessagesRepository(client)
 	defer messagesRepository.Dispose()
-	stateBuffer = make(chan [][]rune, 100)
 	f, err := os.Create("log.txt")
-	check(err)
+	if err != nil {
+		print(err.Error())
+		fmt.Scanln()
+		return
+	}
 	defer f.Close()
 	l := log.New(f, "main ", log.LstdFlags)
 	logger = l
-	var currentCommandId uint64 = 10
-	var currentReceivedMessageId uint64 = 10
-	var currentMessageId uint64 = 10
-	codeChan := readPressedKey()
-	for {
-		select {
-		case code := <-codeChan:
+
+	go func() {
+		for {
+			s, e := requestStateFromServer()
+			if e != nil {
+				l.Println(e.Error())
+				continue
+			}
+			showState(s)
+		}
+	}()
+
+	go func() {
+		var id uint64 = 1
+		for {
+			key := screen.ReadKey()
+			code := parseKeyCode(key)
 			if code > 0 {
-				currentCommandId++
 				for i := 0; i < 4; i++ {
-					currentMessageId++
-					e := sendCommandToServer(szr.Command{currentCommandId, code}, currentMessageId)
+					e := sendCommandToServer(szr.Command{id, code})
+					id++
 					if e != nil {
 						logger.Println(e.Error())
 					}
 				}
 			}
-		default:
-			//Do nothing
 		}
-		e := sendStateMessage(currentMessageId)
+	}()
+
+	for {
+		time.Sleep(time.Microsecond * 1000000/60)
+		e := sendStateMessage()
 		if e != nil {
 			logger.Println(e.Error())
-		}
-		s, e, i := requestStateFromServer(currentReceivedMessageId)
-		if e != nil {
-			l.Println(e.Error())
 			continue
 		}
-		currentReceivedMessageId = i
-		showState(s)
 	}
 }

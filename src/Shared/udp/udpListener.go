@@ -40,6 +40,7 @@ func NewUdpServer(port int, ip string) (IUdpListener, error) {
 func (this server) Read(buffer []byte) (int, Connection, error) {
 	return this.connection.ReadFromUDP(buffer)
 }
+
 func (this server) Write(buffer []byte, address Connection) (int, error) {
 	return this.connection.WriteToUDP(buffer, address)
 }
