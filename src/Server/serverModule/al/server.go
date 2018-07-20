@@ -50,7 +50,7 @@ func (this server) listen() {
 			fmt.Printf("Error on reading from listener %v\n", err)
 			continue
 		}
-		go this.dispatcher.Dispatch(data[:count],fmt.Sprintf("$v",remoteaddr), func(bytes []byte, e error) {
+		go this.dispatcher.Dispatch(data[:count],fmt.Sprintf("%v",remoteaddr), func(bytes []byte, e error) {
 			if bytes != nil{
 				this.pool.Put(bytes)
 			}
