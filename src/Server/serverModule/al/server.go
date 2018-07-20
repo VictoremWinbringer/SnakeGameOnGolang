@@ -3,8 +3,8 @@ package al
 import (
 	"fmt"
 
-	udpModule "../../../Shared/udp"
 	"../bll"
+	. "../dal"
 )
 
 type IServer interface {
@@ -12,7 +12,7 @@ type IServer interface {
 }
 
 type server struct {
-	listener   udpModule.IUdpListener
+	listener   IUdpListener
 	dispatcher bll.IDispatcher
 }
 
@@ -20,13 +20,13 @@ func NewServer(port int, ip string, factory bll.ISeverBllFactory) (IServer, erro
 	if factory == nil {
 		return nil, fmt.Errorf("factory is nil!")
 	}
-	udpLiscener, err := udpModule.NewUdpServer(port, ip)
+	udpLiscener, err := NewUdpServer(port, ip)
 	if err != nil {
 		return nil, err
 	}
 	dispatcher := factory.CreateDispatcher(func(e error) {
 		fmt.Printf("Error on dispathing %v\n", err)
-	}, func(bytes []byte, connection udpModule.Connection) {
+	}, func(bytes []byte, connection Connection) {
 		if len(bytes) < 1 {
 			return
 		}

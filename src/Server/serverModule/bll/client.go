@@ -1,10 +1,12 @@
 package bll
 
 import (
-	"time"
-	"../dal"
-	"../../../Shared/serializer"
 	"fmt"
+	"time"
+
+	"../../../Shared/messageTypeEnum"
+	"../../../Shared/serializer"
+	"../dal"
 )
 
 type IClient interface {
@@ -18,15 +20,15 @@ const MAX_SECONDS_TO_UNACTIV = 5
 
 type client struct {
 	lastActive time.Time
-	session  dal.ISession
-	handlers map[serializer.MessageType]IHandler
+	session    dal.ISession
+	handlers   map[messageTypeEnum.Type]IHandler
 }
 
 func (this *client) IsAlive() bool {
 	oldTime := this.lastActive
 	nowTime := time.Now()
 	timeDelta := nowTime.Unix() - oldTime.Unix()
-	return timeDelta < MAX_SECONDS_TO_UNACTIV;
+	return timeDelta < MAX_SECONDS_TO_UNACTIV
 }
 
 func (this *client) UpdateLastActiveTime() {

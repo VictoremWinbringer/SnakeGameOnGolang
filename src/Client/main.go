@@ -6,15 +6,17 @@ import (
 	"os"
 	"time"
 
+	. "../Shared/commandCodeEnum"
+	. "../Shared/messageTypeEnum"
+	. "../Shared/models"
 	szr "../Shared/serializer"
-	"../Shared/udp"
 	"./dal"
 )
 
 func sendStateMessage() error {
 	err := messagesRepository.Write(
-		szr.Message{
-			Type: szr.GameStateType,
+		Message{
+			Type: GameStateType,
 			Data: make([]byte, 0)})
 	if err != nil {
 		return err
@@ -43,28 +45,28 @@ func showState(state [][]rune) {
 	screen.Show()
 }
 
-func parseKeyCode(key dal.Key) szr.CommandCode {
+func parseKeyCode(key dal.Key) CommandCode {
 	switch key {
 	case dal.KeyUp:
-		return szr.MoveLeft
+		return MoveLeft
 	case dal.KeyDown:
-		return szr.MoveRight
+		return MoveRight
 	case dal.KeyLeft:
-		return szr.MoveUp
+		return MoveUp
 	case dal.KeyRight:
-		return szr.MoveDown
+		return MoveDown
 	case dal.KeyEsc:
-		return szr.ExitGame
+		return ExitGame
 	default:
-		return szr.UndefinedCommand
+		return UndefinedCommand
 	}
 }
 
-func sendCommandToServer(command szr.Command) error {
+func sendCommandToServer(command Command) error {
 	err := messagesRepository.Write(
-		szr.Message{
+		Message{
 			//	Id:   id,
-			Type: szr.CommandType,
+			Type: CommandType,
 			Data: szr.EncodeCommand(command)})
 	if err != nil {
 		return err
@@ -74,7 +76,7 @@ func sendCommandToServer(command szr.Command) error {
 
 var messagesRepository dal.IMessagesRepository
 var screen dal.IScreen
-var udpClient udp.IUdpClient
+var udpClient dal.IUdpClient
 var logger *log.Logger
 
 func main() {
@@ -110,7 +112,7 @@ func main() {
 	}
 	screen = sc
 	defer screen.Close()
-	client, err := udp.NewUdpClient(ip, ipServer, 5)
+	client, err := dal.NewUdpClient(ip, ipServer, 5)
 	if err != nil {
 		print(err.Error())
 		fmt.Scanln()
@@ -146,7 +148,7 @@ func main() {
 			code := parseKeyCode(key)
 			if code > 0 {
 				for i := 0; i < 4; i++ {
-					e := sendCommandToServer(szr.Command{id, code})
+					e := sendCommandToServer(Command{id, code})
 					id++
 					if e != nil {
 						logger.Println(e.Error())
@@ -157,7 +159,7 @@ func main() {
 	}()
 
 	for {
-		time.Sleep(time.Microsecond * 1000000/60)
+		time.Sleep(time.Microsecond * 1000000 / 60)
 		e := sendStateMessage()
 		if e != nil {
 			logger.Println(e.Error())

@@ -1,10 +1,10 @@
 package bll
 
 import (
-	"../dal"
-	"../../../Shared/serializer"
-	"../../../Shared/udp"
 	"time"
+
+	"../../../Shared/messageTypeEnum"
+	"../dal"
 )
 
 func NewSeverBllFactory(dalFactory dal.IServerDalFactory) ISeverBllFactory {
@@ -14,7 +14,7 @@ func NewSeverBllFactory(dalFactory dal.IServerDalFactory) ISeverBllFactory {
 type ISeverBllFactory interface {
 	CreateGameStateHandler() IHandler
 	CreateCommandHandler() IHandler
-	CreateDispatcher(onError func(error), onSuccess func([]byte, udp.Connection)) IDispatcher
+	CreateDispatcher(onError func(error), onSuccess func([]byte, dal.Connection)) IDispatcher
 	CreateClient() IClient
 }
 
@@ -30,15 +30,15 @@ func (this factory) CreateCommandHandler() IHandler {
 	return &commandHandler{lastId: 0}
 }
 
-func (this factory) CreateDispatcher(onError func(error), onSuccess func([]byte, udp.Connection)) IDispatcher {
-	return &dispatcher{onSuccess: onSuccess, onError: onError, clients: make(map[string]IClient), factory:this}
+func (this factory) CreateDispatcher(onError func(error), onSuccess func([]byte, dal.Connection)) IDispatcher {
+	return &dispatcher{onSuccess: onSuccess, onError: onError, clients: make(map[string]IClient), factory: this}
 }
 
 func (this factory) CreateClient() IClient {
 	session := this.dalFactory.CreateSession()
 	session.Start()
-	handlers := make(map[serializer.MessageType]IHandler, 0)
-	handlers[serializer.CommandType] = this.CreateCommandHandler()
-	handlers[serializer.GameStateType] = this.CreateGameStateHandler()
+	handlers := make(map[messageTypeEnum.Type]IHandler, 0)
+	handlers[messageTypeEnum.CommandType] = this.CreateCommandHandler()
+	handlers[messageTypeEnum.GameStateType] = this.CreateGameStateHandler()
 	return &client{time.Now(), session, handlers}
 }

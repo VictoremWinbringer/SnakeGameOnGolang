@@ -1,8 +1,8 @@
 package bll
 
 import (
+	. "../../../Shared/models"
 	"../dal"
-	. "../../../Shared/serializer"
 )
 
 type HandlerType byte

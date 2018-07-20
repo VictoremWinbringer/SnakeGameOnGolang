@@ -3,22 +3,22 @@ package bll
 import (
 	"fmt"
 
-	"../../../Shared/udp"
+	. "../dal"
 )
 
 type IDispatcher interface {
-	Dispatch(data []byte, connection udp.Connection)
+	Dispatch(data []byte, connection Connection)
 	Close()
 }
 
 type dispatcher struct {
-	onSuccess func([]byte, udp.Connection)
+	onSuccess func([]byte, Connection)
 	onError   func(error)
 	clients   map[string]IClient
 	factory   ISeverBllFactory
 }
 
-func (this *dispatcher) Dispatch(data []byte, connection udp.Connection) {
+func (this *dispatcher) Dispatch(data []byte, connection Connection) {
 	this.checkAliveClients()
 	ip := fmt.Sprintf("%v", connection)
 	c, ok := this.clients[ip]

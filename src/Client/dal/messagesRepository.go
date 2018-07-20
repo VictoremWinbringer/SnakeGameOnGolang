@@ -1,42 +1,38 @@
 package dal
 
 import (
+	. "../../Shared/models"
 	"../../Shared/serializer"
-	"../../Shared/udp"
 )
 
 type IMessagesRepository interface {
-	Read() (serializer.Message, error)
-	Write(message serializer.Message) error
+	Read() (Message, error)
+	Write(message Message) error
 	Dispose()
 }
 
-func newIMessageRepository(client udp.IUdpClient) IMessagesRepository {
+func newIMessageRepository(client IUdpClient) IMessagesRepository {
 	return messagesRepository{
-        udpClient: client}
+		udpClient: client}
 }
 
 type messagesRepository struct {
-udpClient udp.IUdpClient
+	udpClient IUdpClient
 }
 
-func (this messagesRepository) Read() (serializer.Message, error) {
+func (this messagesRepository) Read() (Message, error) {
 	p := make([]byte, 4096)
- _ , e :=	this.udpClient.Read(p)
- m := serializer.DecodeMessage(p)
- return m, e
-	//message := serializer.Message{}
-	//err := this.decoder.Decode(&message)
-	//return message, err
+	_, e := this.udpClient.Read(p)
+	m := serializer.DecodeMessage(p)
+	return m, e
 }
 
-func (this messagesRepository) Write(message serializer.Message) error {
+func (this messagesRepository) Write(message Message) error {
 	p := serializer.EncodeMessage(message)
 	_, e := this.udpClient.Write(p)
 	return e
-//return this.encoder.Encode(message)
 }
 
-func (this messagesRepository) Dispose()  {
-this.udpClient.Close()
+func (this messagesRepository) Dispose() {
+	this.udpClient.Close()
 }

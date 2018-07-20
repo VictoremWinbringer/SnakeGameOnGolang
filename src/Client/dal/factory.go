@@ -1,13 +1,11 @@
 package dal
 
 import (
-	"../../Shared/udp"
-
 	tc "github.com/gdamore/tcell"
 )
 
 type IDalFactory interface {
-	CreateMessagesRepository(client udp.IUdpClient) IMessagesRepository
+	CreateMessagesRepository(client IUdpClient) IMessagesRepository
 	CreateScreen() (IScreen, error)
 }
 
@@ -30,6 +28,6 @@ func (this dalFactory) CreateScreen() (IScreen, error) {
 	return screen{s}, nil
 }
 
-func (this dalFactory) CreateMessagesRepository(client udp.IUdpClient) IMessagesRepository {
+func (this dalFactory) CreateMessagesRepository(client IUdpClient) IMessagesRepository {
 	return newIMessageRepository(client)
 }

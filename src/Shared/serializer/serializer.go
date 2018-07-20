@@ -3,45 +3,9 @@ package serializer
 import (
 	"bytes"
 	"encoding/gob"
+
+	. "../models"
 )
-
-type MessageType byte
-
-const UndefinedType MessageType = 0
-const GameStateType MessageType = 1
-const CommandType MessageType = 2
-
-type Message struct {
-	Type MessageType
-	Data []byte
-}
-
-type PartialContent struct {
-	PartNubert      int
-	TotalPartsCount int
-	PartType        byte
-	Data            []byte
-}
-
-type GameState struct {
-	State [][]rune
-}
-
-type CommandCode byte
-
-const (
-	UndefinedCommand CommandCode = 0
-	MoveUp           CommandCode = 1
-	MoveDown         CommandCode = 2
-	MoveLeft         CommandCode = 3
-	MoveRight        CommandCode = 4
-	ExitGame         CommandCode = 5
-)
-
-type Command struct {
-	Id uint64
-	Code CommandCode
-}
 
 func EncodeMessage(value Message) []byte {
 	b := new(bytes.Buffer)

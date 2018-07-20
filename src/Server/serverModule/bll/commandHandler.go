@@ -3,6 +3,8 @@ package bll
 import (
 	"fmt"
 
+	"../../../Shared/messageTypeEnum"
+	. "../../../Shared/models"
 	serializer "../../../Shared/serializer"
 	"../dal"
 )
@@ -14,10 +16,10 @@ type commandHandler struct {
 }
 
 func (this *commandHandler) Type() HandlerType {
-	return HandlerType(serializer.CommandType)
+	return HandlerType(messageTypeEnum.CommandType)
 }
 
-func (this *commandHandler) Handle(data serializer.Message, session dal.ISession) ([]byte, error) {
+func (this *commandHandler) Handle(data Message, session dal.ISession) ([]byte, error) {
 	command := serializer.DecodeCommand(data.Data)
 	if !this.checkAndChangeId(command.Id) {
 		return make([]byte, 0), nil
