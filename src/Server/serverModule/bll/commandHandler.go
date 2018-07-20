@@ -2,6 +2,7 @@ package bll
 
 import (
 	"fmt"
+	"sync"
 
 	"../../../Shared/messageTypeEnum"
 	. "../../../Shared/models"
@@ -13,6 +14,7 @@ type commandHandler struct {
 	lastId     uint64
 	inCount    float32
 	validCount float32
+	mtx        *sync.Mutex
 }
 
 func (this *commandHandler) Type() HandlerType {
@@ -29,10 +31,13 @@ func (this *commandHandler) Handle(data Message, session dal.ISession) ([]byte, 
 }
 
 func (this *commandHandler) checkAndChangeId(id uint64) bool {
+	this.mtx.Lock()
+	defer this.mtx.Unlock()
 	this.inCount++
-	if this.inCount > 100 {
+	if this.inCount > 1000 {
 		fmt.Printf("Packet loss = %v%%\n", ((this.inCount/this.validCount)/4)*100)
-		this.inCount -= 100
+		this.inCount = 0
+		this.validCount = 0
 	}
 	if this.lastId < id {
 		this.lastId = id

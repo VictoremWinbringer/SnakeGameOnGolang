@@ -1,6 +1,7 @@
 package bll
 
 import (
+	"sync"
 	"time"
 
 	"../../../Shared/messageTypeEnum"
@@ -27,7 +28,7 @@ func (this factory) CreateGameStateHandler() IHandler {
 }
 
 func (this factory) CreateCommandHandler() IHandler {
-	return &commandHandler{lastId: 0}
+	return &commandHandler{mtx: &sync.Mutex{}}
 }
 
 func (this factory) CreateDispatcher(onError func(error), onSuccess func([]byte, dal.Connection)) IDispatcher {
