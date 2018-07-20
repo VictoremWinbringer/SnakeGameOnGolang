@@ -2,38 +2,29 @@ package bll
 
 import (
 	"fmt"
-
-	. "../dal"
 )
 
 type IDispatcher interface {
-	Dispatch(data []byte, connection Connection)
+	Dispatch(data []byte, clientId string, callback func([]byte, error))
 	Close()
 }
 
 type dispatcher struct {
-	onSuccess func([]byte, Connection)
-	onError   func(error)
-	clients   map[string]IClient
-	factory   ISeverBllFactory
+	clients map[string]IClient
+	factory ISeverBllFactory
 }
 
-func (this *dispatcher) Dispatch(data []byte, connection Connection) {
+func (this *dispatcher) Dispatch(data []byte, clientId string, callback func([]byte, error)) {
 	this.checkAliveClients()
-	ip := fmt.Sprintf("%v", connection)
-	c, ok := this.clients[ip]
+	c, ok := this.clients[clientId]
 	if !ok {
-		fmt.Printf("Connected new client %s\n", ip)
-		this.clients[ip] = this.factory.CreateClient()
-		c = this.clients[ip]
+		fmt.Printf("Connected new client %s\n", clientId)
+		this.clients[clientId] = this.factory.CreateClient()
+		c = this.clients[clientId]
 	}
 	c.UpdateLastActiveTime()
 	b, e := c.Accept(data)
-	if e != nil {
-		this.onError(e)
-		return
-	}
-	this.onSuccess(b, connection)
+	callback(b, e)
 }
 
 func (this *dispatcher) Close() {

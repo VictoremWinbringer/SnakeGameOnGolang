@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	. "../Shared/commandCodeEnum"
-	. "../Shared/messageTypeEnum"
+	 "../Shared/commandCodeEnum"
+	 "../Shared/messageTypeEnum"
 	. "../Shared/models"
 	szr "../Shared/serializer"
 	"./dal"
@@ -16,7 +16,7 @@ import (
 func sendStateMessage() error {
 	err := messagesRepository.Write(
 		Message{
-			Type: GameStateType,
+			Type: messageTypeEnum.GameStateType,
 			Data: make([]byte, 0)})
 	if err != nil {
 		return err
@@ -45,20 +45,20 @@ func showState(state [][]rune) {
 	screen.Show()
 }
 
-func parseKeyCode(key dal.Key) CommandCode {
+func parseKeyCode(key dal.Key) commandCodeEnum.Type {
 	switch key {
 	case dal.KeyUp:
-		return MoveLeft
+		return commandCodeEnum.MoveLeft
 	case dal.KeyDown:
-		return MoveRight
+		return commandCodeEnum.MoveRight
 	case dal.KeyLeft:
-		return MoveUp
+		return commandCodeEnum.MoveUp
 	case dal.KeyRight:
-		return MoveDown
+		return commandCodeEnum.MoveDown
 	case dal.KeyEsc:
-		return ExitGame
+		return commandCodeEnum.ExitGame
 	default:
-		return UndefinedCommand
+		return commandCodeEnum.UndefinedCommand
 	}
 }
 
@@ -66,7 +66,7 @@ func sendCommandToServer(command Command) error {
 	err := messagesRepository.Write(
 		Message{
 			//	Id:   id,
-			Type: CommandType,
+			Type: messageTypeEnum.CommandType,
 			Data: szr.EncodeCommand(command)})
 	if err != nil {
 		return err

@@ -15,7 +15,7 @@ func NewSeverBllFactory(dalFactory dal.IServerDalFactory) ISeverBllFactory {
 type ISeverBllFactory interface {
 	CreateGameStateHandler() IHandler
 	CreateCommandHandler() IHandler
-	CreateDispatcher(onError func(error), onSuccess func([]byte, dal.Connection)) IDispatcher
+	CreateDispatcher() IDispatcher
 	CreateClient() IClient
 }
 
@@ -31,8 +31,8 @@ func (this factory) CreateCommandHandler() IHandler {
 	return &commandHandler{mtx: &sync.Mutex{}}
 }
 
-func (this factory) CreateDispatcher(onError func(error), onSuccess func([]byte, dal.Connection)) IDispatcher {
-	return &dispatcher{onSuccess: onSuccess, onError: onError, clients: make(map[string]IClient), factory: this}
+func (this factory) CreateDispatcher() IDispatcher {
+	return &dispatcher{clients: make(map[string]IClient), factory: this}
 }
 
 func (this factory) CreateClient() IClient {
