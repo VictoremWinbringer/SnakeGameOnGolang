@@ -32,7 +32,7 @@ func (this *session) Start() {
 	game, _ := al.NewGame(20, 40, commandChannel)
 	this.game = game
 	this.commandChannel = commandChannel
-	this.done = make(chan bool)
+	this.done = make(chan bool,10)
 	go func() {
 		old := time.Now().UnixNano()
 		for {

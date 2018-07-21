@@ -5,7 +5,7 @@ import (
 )
 
 type IDispatcher interface {
-	Dispatch(data []byte, clientId string, callback func([]byte, error))
+	Dispatch(data []byte, clientId string)([]byte, error)
 	Close()
 }
 
@@ -14,7 +14,7 @@ type dispatcher struct {
 	factory ISeverBllFactory
 }
 
-func (this *dispatcher) Dispatch(data []byte, clientId string, callback func([]byte, error)) {
+func (this *dispatcher) Dispatch(data []byte, clientId string) ([]byte, error) {
 	this.checkAliveClients()
 	c, ok := this.clients[clientId]
 	if !ok {
@@ -23,8 +23,7 @@ func (this *dispatcher) Dispatch(data []byte, clientId string, callback func([]b
 		c = this.clients[clientId]
 	}
 	c.UpdateLastActiveTime()
-	b, e := c.Accept(data)
-	callback(b, e)
+	return c.Accept(data)
 }
 
 func (this *dispatcher) Close() {

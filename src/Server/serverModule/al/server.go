@@ -38,11 +38,26 @@ func (this server) Start() error {
 	return nil
 }
 
+const COUNT_THREADS_IN_POOL  = 1000
+
 func (this server) listen() {
 	defer func() {
 		this.listener.Close()
 		this.dispatcher.Close()
 	}()
+	for i:=0; i<COUNT_THREADS_IN_POOL;i++{
+		go func() {
+			for {
+				data := this.pool.New().([]byte)
+				count, remoteaddr, err := this.listener.Read(data)
+				if err != nil {
+					fmt.Printf("Error on reading from listener %v\n", err)
+					continue
+				}
+				this.handle(count, data, remoteaddr)
+			}
+		}()
+	}
 	for {
 		data := this.pool.New().([]byte)
 		count, remoteaddr, err := this.listener.Read(data)
@@ -50,21 +65,22 @@ func (this server) listen() {
 			fmt.Printf("Error on reading from listener %v\n", err)
 			continue
 		}
-		go this.dispatcher.Dispatch(data[:count],fmt.Sprintf("%v",remoteaddr), func(bytes []byte, e error) {
-			if bytes != nil{
-				this.pool.Put(bytes)
-			}
-			if e != nil {
-				fmt.Printf("Error on dispathing %v\n", err)
-				return
-			}
-			if len(bytes) < 1 {
-				return
-			}
-			_, err := this.listener.Write(bytes, remoteaddr)
-			if err != nil {
-				fmt.Printf("Couldn't send response - %v \n", e)
-			}
-		})
+		this.handle(count, data, remoteaddr)
+	}
+}
+
+func (this server) handle(count int, data []byte, remoteaddr Connection) {
+	bytes, err := this.dispatcher.Dispatch(data[:count], fmt.Sprintf("%v", remoteaddr))
+	this.pool.Put(data)
+	if err != nil {
+		fmt.Printf("Error on dispathing %v\n", err)
+		return
+	}
+	if len(bytes) < 1 {
+		return
+	}
+	_, err = this.listener.Write(bytes, remoteaddr)
+	if err != nil {
+		fmt.Printf("Couldn't send response - %v \n", err)
 	}
 }
