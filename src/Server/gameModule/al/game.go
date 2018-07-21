@@ -66,12 +66,12 @@ func (game *game) Logic(timeDeltaInNanoSeconds int64) bool {
 		}
 	default:
 	}
-	if game.snake.IsHit(game.frame) || game.snake.IsHitTail() {
-		game.snake.Reset()
-	}
-	game.snake.TryEat(game.food)
 	if game.timeBuffer >= timeDeltaInNanoSecondsAfterThatSnakeMoves {
 		game.snake.Move()
+		game.snake.TryEat(game.food)
+		if game.snake.IsHit(game.frame) || game.snake.IsHitTail() {
+			game.snake.Reset()
+		}
 		game.timeBuffer -= timeDeltaInNanoSecondsAfterThatSnakeMoves
 	}
 	return true
