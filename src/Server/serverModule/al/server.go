@@ -41,24 +41,55 @@ func (this server) Start() error {
 
 const COUNT_THREADS_IN_POOL = 1000
 
+type inValue struct {
+	count      int
+	data       []byte
+	remoteaddr Connection
+}
+
+type outValue struct {
+	data []byte
+	remoteaddr Connection
+}
+
 func (this server) listen() {
+	in := make(chan inValue, 100)
+	out := make(chan outValue, 100)
 	defer func() {
 		this.listener.Close()
 		this.dispatcher.Close()
+		close(in)
+		close(out)
 	}()
 	for i := 0; i < COUNT_THREADS_IN_POOL; i++ {
 		go func() {
-			for {
-				data := this.pool.Get().([]byte)
-				count, remoteaddr, err := this.listener.Read(data)
+			for input := range in {
+				bytes, err := this.dispatcher.Dispatch(input.data[:input.count], fmt.Sprintf("%v", input.remoteaddr))
+				this.pool.Put(input.data)
 				if err != nil {
-					fmt.Printf("Error on reading from listener %v\n", err)
+					fmt.Printf("Error on dispathing %v\n", err)
 					continue
 				}
-				this.handle(count, data, remoteaddr)
+				if len(bytes) < 1 {
+					continue
+				}
+				out <- outValue{bytes,input.remoteaddr}
 			}
 		}()
 	}
+	go func() {
+		for result := range out {
+			for i := 0; i < len(result.data); {
+				count, err := this.listener.Write(result.data, result.remoteaddr)
+				if err != nil {
+					fmt.Printf("Couldn't send response - %v \n", err)
+					break
+				}
+				i+=count
+			}
+		}
+	}()
+
 	for {
 		data := this.pool.Get().([]byte)
 		count, remoteaddr, err := this.listener.Read(data)
@@ -66,22 +97,6 @@ func (this server) listen() {
 			fmt.Printf("Error on reading from listener %v\n", err)
 			continue
 		}
-		this.handle(count, data, remoteaddr)
-	}
-}
-
-func (this server) handle(count int, data []byte, remoteaddr Connection) {
-	bytes, err := this.dispatcher.Dispatch(data[:count], fmt.Sprintf("%v", remoteaddr))
-	this.pool.Put(data)
-	if err != nil {
-		fmt.Printf("Error on dispathing %v\n", err)
-		return
-	}
-	if len(bytes) < 1 {
-		return
-	}
-	_, err = this.listener.Write(bytes, remoteaddr)
-	if err != nil {
-		fmt.Printf("Couldn't send response - %v \n", err)
+		in <- inValue{count:count,remoteaddr:remoteaddr, data:data}
 	}
 }
