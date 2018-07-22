@@ -3,9 +3,10 @@ package al
 import (
 	"fmt"
 
+	"sync"
+
 	"../bll"
 	. "../dal"
-	"sync"
 )
 
 type IServer interface {
@@ -38,17 +39,17 @@ func (this server) Start() error {
 	return nil
 }
 
-const COUNT_THREADS_IN_POOL  = 1000
+const COUNT_THREADS_IN_POOL = 1000
 
 func (this server) listen() {
 	defer func() {
 		this.listener.Close()
 		this.dispatcher.Close()
 	}()
-	for i:=0; i<COUNT_THREADS_IN_POOL;i++{
+	for i := 0; i < COUNT_THREADS_IN_POOL; i++ {
 		go func() {
 			for {
-				data := this.pool.New().([]byte)
+				data := this.pool.Get().([]byte)
 				count, remoteaddr, err := this.listener.Read(data)
 				if err != nil {
 					fmt.Printf("Error on reading from listener %v\n", err)
@@ -59,7 +60,7 @@ func (this server) listen() {
 		}()
 	}
 	for {
-		data := this.pool.New().([]byte)
+		data := this.pool.Get().([]byte)
 		count, remoteaddr, err := this.listener.Read(data)
 		if err != nil {
 			fmt.Printf("Error on reading from listener %v\n", err)

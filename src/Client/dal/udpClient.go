@@ -35,7 +35,6 @@ func NewUdpClient(clientIp, serverIp string, timeOut uint) (IUdpClient, error) {
 }
 
 func (c udpClient) Read(p []byte) (int, error) {
-	//c.connection.SetReadDeadline(time.Now().Add(time.Second * time.Duration(c.timeOut)))
 	i, a, e := c.connection.ReadFromUDP(p)
 	if e != nil {
 		return 0, e
@@ -47,7 +46,6 @@ func (c udpClient) Read(p []byte) (int, error) {
 }
 
 func (c udpClient) Write(p []byte) (int, error) {
-	//	c.connection.SetWriteDeadline(time.Now().Add(time.Second * time.Duration(c.timeOut)))
 	return c.connection.WriteToUDP(p, c.remouteAddress)
 }
 
