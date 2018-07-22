@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"sync"
 
+	"math"
+
 	"../../../Shared/messageTypeEnum"
 	. "../../../Shared/models"
 	"../../../Shared/serializer"
 	"../dal"
-	"math"
 )
 
 type commandHandler struct {
 	lastId     uint64
-	inCount    float64
-	validCount float64
+	startId    uint64
+	validCount uint64
 	mtx        *sync.Mutex
 }
 
@@ -34,10 +35,9 @@ func (this *commandHandler) Handle(data Message, session dal.ISession) ([]byte, 
 func (this *commandHandler) checkAndChangeId(id uint64) bool {
 	this.mtx.Lock()
 	defer this.mtx.Unlock()
-	this.inCount++
-	if this.inCount > 1000 {
-		fmt.Printf("Packet loss = %v%%\n", math.Max(0,100 -((this.validCount*4)/this.inCount)*100))
-		this.inCount = 0
+	if this.validCount > 1000 {
+		fmt.Printf("Packet loss = %v%%\n", math.Max(0, 100-(float64(this.validCount)/float64(this.lastId-this.startId))*100))
+		this.startId = this.lastId
 		this.validCount = 0
 	}
 	if this.lastId < id {
