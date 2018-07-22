@@ -1,4 +1,4 @@
-gpackage bll
+package bll
 
 import (
 	"fmt"
