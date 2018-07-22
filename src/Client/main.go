@@ -147,9 +147,9 @@ func main() {
 			key := screen.ReadKey()
 			code := parseKeyCode(key)
 			if code > 0 {
+				id++
 				for i := 0; i < 4; i++ {
 					e := sendCommandToServer(Command{id, code})
-					id++
 					if e != nil {
 						logger.Println(e.Error())
 					}
