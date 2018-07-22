@@ -6,14 +6,15 @@ import (
 
 	"../../../Shared/messageTypeEnum"
 	. "../../../Shared/models"
-	serializer "../../../Shared/serializer"
+	"../../../Shared/serializer"
 	"../dal"
+	"math"
 )
 
 type commandHandler struct {
 	lastId     uint64
-	inCount    float32
-	validCount float32
+	inCount    float64
+	validCount float64
 	mtx        *sync.Mutex
 }
 
@@ -35,7 +36,7 @@ func (this *commandHandler) checkAndChangeId(id uint64) bool {
 	defer this.mtx.Unlock()
 	this.inCount++
 	if this.inCount > 1000 {
-		fmt.Printf("Packet loss = %v%%\n", ((this.inCount/this.validCount)/4)*100)
+		fmt.Printf("Packet loss = %v%%\n", math.Max(0,100 -((this.validCount*4)/this.inCount)*100))
 		this.inCount = 0
 		this.validCount = 0
 	}
